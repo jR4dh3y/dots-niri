@@ -26,7 +26,7 @@ If you only need the wallpaper assets, see `assets/wal/`.
 1) Clone the repo
 
 ```bash
-git clone https://github.com/your-user/dots-niri.git "$HOME/code/dots-niri"
+git clone https://github.com/jr4dh3y/dots-niri.git "$HOME/code/dots-niri"
 cd "$HOME/code/dots-niri"
 ```
 
