@@ -1,0 +1,37 @@
+# How the image is parse, in order to get the colors:
+# full - resized - wal - thumb -  fastresize - kmeans
+backend = "thumb"
+
+# What color space to use to produce and select the most prominent colors:
+# lab - labmixed - lch - lchmixed
+color_space = "lchmixed"
+
+# Use the most prominent colors in a way that makes sense, a scheme color palette:
+# dark - dark16 - darkcomp - darkcomp16
+# light - light16 - lightcomp - lightcomp16
+# harddark - harddark16 - harddarkcomp - harddarkcomp16
+# softdark - softdark16 - softdarkcomp - softdarkcomp16
+# softlight - softlight16 - softlightcomp - softlightcomp16
+palette = "softlight16"
+
+# Ensures a "readable contrast" (OPTIONAL, disabled by default)
+# Should only be enabled when you notice an unreadable contrast frequently happening
+# with your images. The reference color for the contrast is the background color.
+check_contrast = true
+
+# Color saturation, between [1% and 100%] (OPTIONAL, disabled by default)
+# usually something higher than 50 increases the saturation and below
+# decreases it (on a scheme with strong and vivid colors)
+saturation = 50
+
+# Alpha value for templating, by default 100 (no other use whatsoever)
+alpha = 0
+
+[templates]
+hyprland = { template = "hyprland-colors.conf", target = "~/.config/hypr/hyprland/colors.conf" }
+hyprlock = { template = "hyprlock.conf", target = "~/.config/hypr/hyprlock.conf" } 
+waybar = { template = "waybar-colors.sass" , target = "~/.config/waybar/colors.sass" }
+ags = { template = "ags-colors.sass", target = "~/.config/ags/colors.sass" }
+rofi = { template = "rofi-colors.rasi", target = "~/.config/rofi/colors.rasi", pywal=true}
+neopywal = { template = "neopywal.vim", target = "~/.cache/wal/colors-wal.vim" }
+wlogout = { template = "wlogout.css", target = "~/.config/wlogout/colors.css" }

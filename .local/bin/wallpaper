@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import subprocess
+import argparse
+from pathlib import Path
+
+
+def print_help():
+    print(
+        """Usage: wallpaper <options> [image_path]
+Options:
+  -h,  --help: Show this help message
+  -c,  --crop: Crop the image to fit the screen
+  -f,  --fit: Resize the image to fit the screen
+  -s,  --stretch: Stretch the image to fit the screen
+  -wa, --wal-args: Pass additional arguments to wallust
+  -S,  --scheme: prints the current colorscheme"""
+    )
+    sys.exit(0)
+
+
+def restore():
+    file_path = os.path.expanduser("~/.cache/wallpaper")
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            wallpaper = file.read().strip()
+            return wallpaper
+    return ""
+
+
+def no_stdout(cmd):
+    return subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def generate_colors(img_path):
+    no_stdout(["wallust", "-s", "run", img_path])
+
+
+def generate_thumbnail(video):
+    thumb_path = f"/tmp/{os.getlogin()}-thumbnail.png"
+    if Path(thumb_path).exists():
+        os.remove(thumb_path)
+    no_stdout(["ffmpeg", "-i", video, "-vf", "thumbnail", "-frames:v", "1", thumb_path])
+    return thumb_path
+
+
+def use_swww(img_path, resize):
+    subprocess.run(["pkill", "mpvpaper"])
+    no_stdout(
+        [
+            "swww",
+            "img",
+            "--filter",
+            "Lanczos3",
+            "--resize",
+            resize,
+            "--transition-duration",
+            "1",
+            "--transition-type",
+            "center",
+            img_path,
+        ]
+    )
+
+
+def use_mpv(img_path):
+    import json
+
+    outputs = json.loads(subprocess.check_output(["hyprctl", "monitors", "-j"]))
+    width = min(output["width"] for output in outputs)
+    height = min(output["height"] for output in outputs)
+
+    result = subprocess.check_output(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=width,height",
+            "-of",
+            "csv=s=x:p=0",
+            img_path,
+        ],
+        text=True,
+    ).strip()
+
+    v_width, v_height = map(int, result.split("x"))
+    if v_width > width:
+        scaled = f"/tmp/{os.getlogin()}-scaled.mp4"
+        no_stdout(
+            [
+                "ffmpeg",
+                "-i",
+                img_path,
+                "-vf",
+                f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
+                f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2",
+                scaled,
+            ]
+        )
+        video = scaled
+    else:
+        video = img_path
+
+    for output in outputs:
+        no_stdout(["mpvpaper", "-s", "-o", "no-audio loop", output["name"], video])
+
+
+def main():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-h", "--help", action="store_true")
+    parser.add_argument("-c", "--crop", action="store_true")
+    parser.add_argument("-f", "--fit", action="store_true")
+    parser.add_argument("-s", "--stretch", action="store_true")
+    parser.add_argument("-wa", "--wal-args", nargs=1)
+    parser.add_argument("-S", "--scheme", action="store_true")
+    parser.add_argument("image_path", nargs="?")
+    args = parser.parse_args()
+
+    if args.help:
+        print_help()
+
+    resize = "crop"
+    if args.fit:
+        resize = "fit"
+    elif args.stretch:
+        resize = "stretch"
+
+    img_path = args.image_path or restore()
+    img_path = os.path.realpath(img_path)
+
+    if args.scheme:
+        subprocess.run(["colorscheme", img_path])
+        sys.exit(0)
+
+    if not img_path or not Path(img_path).exists():
+        print(f"File not found: {img_path}")
+        sys.exit(1)
+
+    file_type = subprocess.check_output(
+        ["file", "-b", "--mime-type", img_path], text=True
+    ).strip()
+
+    if not os.getenv("WAL_BACKEND"):
+        os.environ["WAL_BACKEND"] = "haishoku"
+
+    if file_type.startswith("image/"):
+        generate_colors(img_path)
+        use_swww(img_path, resize)
+    elif file_type.startswith("video/"):
+        thumb = generate_thumbnail(img_path)
+        generate_colors(thumb)
+        use_mpv(img_path)
+    else:
+        print(f"Unsupported file type: {file_type}")
+        sys.exit(1)
+
+    no_stdout(["hyprctl", "reload"])
+
+    subprocess.run(["colorscheme", img_path])
+
+    with open(os.path.expanduser("~/.cache/wallpaper"), "w") as file:
+        file.write(img_path)
+
+
+if __name__ == "__main__":
+    main()

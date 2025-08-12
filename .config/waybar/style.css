@@ -1,0 +1,160 @@
+/* 
+   Importing colors from theme directory
+*/
+
+@import url("../themes/colors-waybar.css");
+
+*{
+   font-size: 15px;
+   font-family: Adwaita Mono;
+   font-weight: 600;
+   min-height: 0;
+   padding-top: 0px;
+   padding-bottom: 0px;
+}
+
+window#waybar {
+   background: @bg_color;
+   color: @fg_color;
+}
+
+#workspaces button {
+   background: @bg_color;
+   color: @fg_color;
+   margin: 2px;
+   padding: 0px;
+   border-radius: 4px;
+}
+
+#workspaces button:hover {
+   background: @highlight_color;
+   color: @invert_color;
+   box-shadow: inherit;
+   text-shadow: inherit;
+}
+
+#workspaces button.focused {
+   background: @highlight_color;
+   color: @invert_color;
+}
+
+#workspaces button.urgent {
+   background: @urgent_color;
+   color: @invert_color;
+}
+
+#cpu {
+   color: @funny_pastel_color;
+   padding: 0px 4px;
+}
+
+#custom-gpu1 {
+   color: @first_right_color;
+   padding: 0px 4px;
+}
+
+#custom-gpu2 {
+   color: @middle_right_color;
+   padding: 0px 4px;
+}
+
+#memory {
+   color: @middle_color;
+   padding: 0px 4px;
+}
+
+#disk {
+   color: @last_right_color;
+   padding: 0px 4px;
+}
+
+
+#custom-cogicon {
+   color: @last_right_color;
+   padding: 0px 4px;
+   font-size: 20px;
+}
+#scratchpad {
+   background: @highlight_color;
+   color: @invert_color;
+   margin: 0px 0px 2px 0px;
+   padding: 0px 8px;
+   border-radius: 0px;
+}
+
+#battery,
+#clock,
+#custom-notifications,
+#custom-updates,
+#idle_inhibitor,
+#network,
+#power-profiles-daemon,
+#privacy,
+#pulseaudio,
+#tray {
+   border-radius: 4px;
+   margin: 2px;
+   padding: 0px 4px;
+}
+
+#clock {
+   color: @middle_color;
+}
+
+#custom-notifications,
+#custom-updates,
+#idle_inhibitor {
+   color: @first_right_color;
+}
+
+#pulseaudio {
+   color: @middle_right_color;
+}
+
+#battery,
+#power-profiles-daemon {
+   color: @last_right_color;
+}
+
+#privacy {
+   background-color: @caution_color;
+   color: @invert_color;
+}
+
+#tray {
+   background-color: @tray_color;
+}
+
+#power-profiles-daemon.performance {
+   background-color: @caution_color;
+   color: @invert_color;
+}
+
+#custom-separator {
+   color: @accent_color;
+   margin: 0 2px;
+   padding: 0px;
+}
+
+@keyframes blink {
+   50% {
+      opacity: 0;
+   }
+}
+
+#battery.warning:not(.charging) {
+   background-color: @caution_color;
+   color: @invert_color;
+}
+
+#battery.critical:not(.charging) {
+   background-color: @urgent_color;
+   color: @invert_color;
+}
+
+#battery.critical:not(.charging) {
+   animation-name: blink;
+   animation-duration: 2s;
+   animation-timing-function: ease-in-out;
+   animation-iteration-count: infinite;
+}

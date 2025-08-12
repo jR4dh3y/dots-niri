@@ -1,0 +1,40 @@
+[
+{
+   "id": "bar-0",
+   "name": "bar-niri",
+   "layer": "top",
+   "mode": "dock",
+   "height": 25,
+   "margin": 4,
+   "spacing": 5,
+   "include": [
+      "$HOME/.config/waybar/modules.jsonc"
+   ],
+   "modules-left": [
+      "custom/padd",
+      "niri/workspaces",
+      "custom/separator",
+      "group/right-group"
+   ],
+   "modules-center": [
+      "clock"
+   ],
+   "modules-right": [
+      "tray",
+      "privacy",
+      "custom/separator",
+      "custom/updates",
+      "idle_inhibitor",
+      "custom/notifications",
+      "custom/separator",
+      "backlight",
+      "custom/separator",
+      "pulseaudio",
+      "custom/separator",
+      "power-profiles-daemon", // via tuned and tuned-ppd
+      // "custom/bat",
+      "battery",
+      "custom/padd"
+   ]
+}
+]

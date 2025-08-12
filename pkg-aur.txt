@@ -1,0 +1,15 @@
+adobe-source-han-fonts
+apg 
+breezex-cursor-theme 
+ccze 
+confz 
+fish-fzf
+kvantum-theme-fluent-git
+makepkg-git-lfs-proto 
+marp-cli
+mycli 
+niri-git 2
+ttf-noto-sans-cjk-vf 
+wallust 
+whitesur-icon-theme
+xwayland-satellite-git

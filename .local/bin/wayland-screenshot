@@ -1,0 +1,33 @@
+#! /usr/bin/env bash
+
+SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+
+SLURP_ARGS=
+
+if [ ! -d "$SCREENSHOT_DIR" ]; then
+	mkdir -p "$SCREENSHOT_DIR"
+fi
+
+mode=$1
+
+if [ -z "$mode"   ]; then
+	mode="screen"
+fi
+
+if [ "$mode" == "ocr"  ]; then
+	grimblast --freeze save area "/tmp/$(whoami)-snip.png"
+	tesseract -l enf "/tmp/$(whoami)-snip.png" - | wl-copy
+	rm "/tmp/$(whoami)-snip.png"
+
+	exit 0
+fi
+
+if [ "$mode" == "edit" ]; then
+	GRIMBLAST_EDITOR="swappy -f" grimblast --freeze edit area 
+	exit 0
+fi
+
+PICNAME="Screenshot $(date '+%Y-%m-%d %H%M%S').png"
+PICPATH="$SCREENSHOT_DIR/$PICNAME"
+
+grimblast --notify copysave $mode "$PICPATH"

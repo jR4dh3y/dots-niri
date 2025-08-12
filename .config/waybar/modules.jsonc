@@ -1,0 +1,205 @@
+{
+   "niri/workspaces": {
+      "format": "{icon}",
+      "format-icons": {
+         "browser": "󰈹",
+         "chat": "",
+         "code": "",
+         "create": "",
+         "music": ""
+      }
+   },
+
+   "clock": {
+      "format": "{:%Y-%m-%d %H:%M}"  
+   },   
+
+   "battery": {
+      "full-at": 96,
+      "states": {
+         "good": 78,
+         "ok": 77,
+         "warning": 20,
+         "critical": 10
+      },
+      "format": "{icon} {capacity}%",
+      "format-charging": " {capacity}%",
+      "format-plugged": " {capacity}%",
+      "format-time": "{H}h {M}m",
+      "format-icons": [ "󰁺","󰁻", "󰁼", "󰁽", "󰁾","󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+      "tooltip": true,
+      "tooltip-format": "Time: {time}\nPower: {power}W"
+   },
+
+   "network": {
+      "format-wifi": "󰤨",
+      "format-ethernet": "󰈀",
+      "format-disconnected": "󰤭",
+      "tooltip": true
+   },
+
+   "pulseaudio": {
+      "format": "{icon} {volume}%",
+      "format-muted": "",
+      "format-icons": {
+         "headphones": "",
+         "headset": "",
+         "default": ["","",""]
+      },
+      "tooltip": false
+   },
+
+   "privacy": {
+      "icon-spacing": 4,
+      "icon-size": 15,
+      "transition-duration": 250,
+      "modules": [
+         {
+         "type": "screenshare",
+         "tooltip": false,
+         "tooltip-icon-size": 15
+         },
+         {
+            "type": "audio-out",
+            "tooltip": false,
+            "tooltip-icon-size": 15
+         },
+         {
+         "type": "audio-in",
+         "tooltip": false,
+         "tooltip-icon-size": 15
+         }
+      ]
+   },
+
+   "tray": {
+      "icon-size": 15,
+      "spacing": 8
+   },
+   "custom/cogicon":{
+      "format": "󰒔 "
+   },
+
+   "group/right-group": {
+        "orientation": "inherit",
+        "drawer": {
+            "icon-spacing": 4,
+            "icon-size": 15,
+            "format": "󰒻",
+            "click-to-reveal": true,
+            "transition-duration": 400,
+            "transition-left-to-right": true
+        },
+        "modules": [
+            "custom/cogicon",
+            "cpu",
+            "memory",
+            "custom/gpu1",
+            "custom/gpu2",
+            "disk"
+        ]
+    },
+   
+   "idle_inhibitor": {
+       "format": "{icon}",
+       "format-icons": {
+           "activated": "",
+           "deactivated": ""
+       },
+      "tooltip": false
+   },
+   "custom/padd": {
+      "return-type": "text",
+      "interval": "once",
+      "format": " ",
+      "tooltip": false
+   },
+   "custom/gpu1": {
+      "exec": "if [ -f /sys/class/drm/card*/device/gpu_busy_percent ]; then usage=$(cat /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | head -1); freq=$(cat /sys/class/drm/card*/device/pp_dpm_sclk 2>/dev/null | grep '*' | awk '{print $2}' | sed 's/Mhz//'); temp=$(cat /sys/class/hwmon/hwmon*/temp*_input 2>/dev/null | head -1 | awk '{print int($1/1000)}'); usage=${usage:-0}; printf '{\\\"text\\\":\\\"%s\\\",\\\"tooltip\\\":\\\"GPU Usage: %s%%\\\\nFrequency: %s\\\\nTemperature: %s°C\\\"}' \"$usage\" \"$usage\" \"${freq:-N/A}\" \"${temp:-N/A}\"; else echo '{\\\"text\\\":\\\"N/A\\\",\\\"tooltip\\\":\\\"AMD iGPU not available\\\"}'; fi",
+      "return-type": "json",
+      "interval": 5,
+      "format": "AMD:{text}%",
+      "format-icons": {
+         "default": ["󰢮"]
+      },
+      "tooltip": true
+   },
+   "custom/gpu2": {
+      "exec": "nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv,noheader,nounits 2>/dev/null | head -1 | awk -F',' '{usage=$1; mem_used=$2; mem_total=$3; temp=$4; power=$5; printf \"{\\\"text\\\":\\\"%s%%\\\",\\\"tooltip\\\":\\\"GPU: %s%%\\\\nMemory: %s/%s MB\\\\nTemperature: %s°C\\\\nPower: %sW\\\"}\", usage, usage, mem_used, mem_total, temp, power}' || echo '{\"text\":\"N/A\",\"tooltip\":\"GPU not available\"}'",
+      "return-type": "json",  
+      "interval": 5,
+      "format": "NVIDIA:{text}",
+      "format-icons": {
+         "default": ["󰢮"]
+      },
+      "tooltip": true
+   },
+   "backlight": {
+      "format": "{icon} {percent}%",
+      "format-icons": {
+         "default": ["󰃞","󰃟", "󰃠"]
+      },
+      "tooltip": true
+   },
+
+   "cpu": {
+      "interval": 5,
+      "format": "CPU:{usage}%",
+      "format-icons": {
+          "default": ["󰍛"]
+      }
+   },
+   "memory": {
+      "interval": 5,
+      "format": "RAM:{used}GB",
+      "format-used": "{used} GB",
+      "format-total": "{total} GB",
+      "format-icons": {
+         "default": ["󰘚"]
+      },
+      "tooltip": true,
+      "tooltip-format": "Used: {used}GB\nAvailable: {avail}GB\nTotal: {total}GB\nPercentage: {percentage}%"
+   },
+   "disk": {
+      "path" : "/",
+      "interval": 5,
+      "format": "DISK:{used}",
+      "format-icons": {
+         "default": ["󰋊"]
+      },
+      "tooltip": true
+   },
+   "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip": false,
+      "format-icons": {
+          "default": "󰓅",
+          "performance": "󰓅",
+          "balanced": "",
+          "power-saver": "󰌪"
+      }
+   },
+
+   "custom/notifications": {
+      "exec": "$HOME/.config/scripts/waybar-notifications.sh",
+      "return-type": "json",
+      "restart-interval": 2,
+      "on-click": "dunstctl set-paused toggle"
+   },
+
+   "custom/separator": {
+      "return-type": "text",
+      "interval": "once",
+      "format": "·",
+      "tooltip": false
+   },
+
+   "custom/updates": {
+      "exec": "$HOME/.config/scripts/waybar-updates.sh",
+      "return-type": "json",
+      "exec-if": "[[ $(checkupdates-with-aur | wc -l) ]]",
+      "interval": "once",
+      "on-click": "foot --app-id=sysadmin --title=update paru -Syu && notify-send 'The system has been updated'"
+   }
+}
+
