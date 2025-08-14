@@ -13,6 +13,18 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 USER_NAME=${SUDO_USER:-${USER}}
 USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
+# Helper: run a command explicitly as the invoking (non-root) user when the script
+# itself is executing with elevated privileges (via sudo). This is vital for
+# AUR builds (makepkg/paru) which must NOT be executed as root.
+run_as_invoking_user() {
+	if [[ -n ${SUDO_USER:-} && $EUID -eq 0 ]]; then
+		# Preserve a minimal environment (HOME + USER + PATH). Paru/makepkg rely on HOME.
+		HOME="$USER_HOME" sudo -u "$SUDO_USER" --preserve-env=HOME,PATH USER="$SUDO_USER" "$@"
+	else
+		"$@"
+	fi
+}
+
 PACMAN=${PACMAN:-pacman}
 SUDO_CMD=""
 
@@ -20,6 +32,12 @@ msg() { printf "\033[1;32m==>\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m==>\033[0m %s\n" "$*"; }
 err() { printf "\033[1;31m==>\033[0m %s\n" "$*" 1>&2; }
 die() { err "$*"; exit 1; }
+
+print_banner() {
+cat <<'EOF'
+				 -- jR4dh3y dotfiles installer --
+EOF
+}
 
 require_arch() {
 	[[ -f /etc/arch-release ]] || die "This script is intended for Arch Linux."
@@ -31,6 +49,11 @@ need_sudo() {
 		SUDO_CMD="sudo"
 	else
 		SUDO_CMD=""
+		# If the script is run directly as root (not via sudo), we cannot safely
+		# build AUR packages. Force the user to re-run under their normal account.
+		if [[ -z ${SUDO_USER:-} ]]; then
+			die "Do not run this script directly as root. Run it as your normal user with sudo privileges (e.g. 'bash install.sh' or 'sudo -E -u <user> bash install.sh')."
+		fi
 	fi
 }
 
@@ -111,12 +134,13 @@ ensure_paru() {
 	if $SUDO_CMD $PACMAN -S --needed --noconfirm paru; then
 		return
 	fi
-	# Build from AUR
+	# Build from AUR (must be as normal user)
 	local build_dir="/tmp/paru-build"
 	rm -rf "$build_dir"
-	git clone --depth=1 https://aur.archlinux.org/paru.git "$build_dir"
+	run_as_invoking_user git clone --depth=1 https://aur.archlinux.org/paru.git "$build_dir"
 	pushd "$build_dir" >/dev/null
-	makepkg -si --noconfirm
+	run_as_invoking_user bash -c 'cd "$0" >/dev/null 2>&1 || true' "$build_dir" || true
+	run_as_invoking_user makepkg -si --noconfirm
 	popd >/dev/null
 	rm -rf "$build_dir"
 }
@@ -127,7 +151,7 @@ install_aur_packages() {
 	msg "Installing AUR packages from pkg-aur.txt (using paru)"
 	mapfile -t pkgs < <(awk '{print $1}' "$list_file" | sed -e 's/#.*//' -e '/^\s*$/d')
 	if ((${#pkgs[@]})); then
-		paru -S --needed --noconfirm "${pkgs[@]}"
+		run_as_invoking_user paru -S --needed --noconfirm --skipreview "${pkgs[@]}"
 	else
 		warn "No AUR packages found in pkg-aur.txt after filtering"
 	fi
@@ -213,6 +237,7 @@ EOF
 main() {
 	require_arch
 	need_sudo
+	print_banner
 	enable_pacman_tweaks
 	refresh_keys_and_system
 	setup_prereqs
@@ -220,11 +245,11 @@ main() {
 	ensure_paru
 	# Use paru for a unified install of both official and AUR packages
 	if [[ -f "$SCRIPT_DIR/pkg.txt" || -f "$SCRIPT_DIR/pkg-aur.txt" ]]; then
-		msg "Installing packages from pkg.txt and pkg-aur.txt via paru"
+		msg "Installing packages from pkg.txt and pkg-aur.txt via paru (non-root)"
 		mapfile -t pkgs < <( { [[ -f "$SCRIPT_DIR/pkg.txt" ]] && awk '{print $1}' "$SCRIPT_DIR/pkg.txt"; [[ -f "$SCRIPT_DIR/pkg-aur.txt" ]] && awk '{print $1}' "$SCRIPT_DIR/pkg-aur.txt"; } \
 			| sed -e 's/#.*//' -e '/^\s*$/d' | sort -u )
 		if ((${#pkgs[@]})); then
-			paru -S --needed --noconfirm "${pkgs[@]}"
+			run_as_invoking_user paru -S --needed --noconfirm --skipreview "${pkgs[@]}"
 		else
 			warn "No packages found after parsing lists"
 		fi
