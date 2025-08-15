@@ -69,14 +69,11 @@ qt5-quickcontrols
 qt5-quickcontrols2
 qt6ct
 radeontop
-raylib
 rye
 sassc
 satty
-sbctl
 scrcpy
 sof-firmware
-steam
 swayidle
 swaync
 swww
