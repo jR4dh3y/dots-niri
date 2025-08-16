@@ -35,7 +35,13 @@ die() { err "$*"; exit 1; }
 
 print_banner() {
 cat <<'EOF'
-				 -- jR4dh3y dotfiles installer --
+------------------------------------------------------------------
+ |                                                              |
+ |                                                              |
+ |				 -- jR4dh3y dotfiles installer --               |
+ |                                                              |
+ |                                                              |
+------------------------------------------------------------------ 
 EOF
 }
 
@@ -112,48 +118,69 @@ EOF'
 	$SUDO_CMD $PACMAN -Sy
 }
 
-install_official_packages() {
-	local list_file="$SCRIPT_DIR/pkg.txt"
-	[[ -f "$list_file" ]] || { warn "Missing pkg.txt, skipping official package install"; return; }
-	msg "Installing official/chaotic packages from pkg.txt"
-	# Take only the first column per line to avoid stray tokens (e.g., "niri-git 2")
-	mapfile -t pkgs < <(awk '{print $1}' "$list_file" | sed -e 's/#.*//' -e '/^\s*$/d')
-	if ((${#pkgs[@]})); then
-		$SUDO_CMD $PACMAN -S --needed --noconfirm "${pkgs[@]}"
-	else
-		warn "No packages found in pkg.txt after filtering"
-	fi
-}
-
-ensure_paru() {
+# Install paru if no AUR helper is present (or user prefers paru). Adapted to run builds as invoking user.
+install_paru() {
 	if command -v paru >/dev/null 2>&1; then
 		msg "paru already installed"
 		return
 	fi
-	msg "Installing paru (prefer via Chaotic-AUR, else build from AUR)"
-	if $SUDO_CMD $PACMAN -S --needed --noconfirm paru; then
-		return
+	msg "Installing paru (AUR helper)"
+	# Ensure prerequisites (base-devel, git, rustup) present
+	$SUDO_CMD $PACMAN -S --needed --noconfirm base-devel git rustup || true
+	# Initialize rustup (as user) and set nightly default (only if rustup just installed)
+	if command -v rustup >/dev/null 2>&1; then
+		run_as_invoking_user rustup toolchain install nightly >/dev/null 2>&1 || true
+		run_as_invoking_user rustup default nightly >/dev/null 2>&1 || true
 	fi
-	# Build from AUR (must be as normal user)
 	local build_dir="/tmp/paru-build"
 	rm -rf "$build_dir"
-	run_as_invoking_user git clone --depth=1 https://aur.archlinux.org/paru.git "$build_dir"
+	run_as_invoking_user git clone https://aur.archlinux.org/paru.git "$build_dir"
 	pushd "$build_dir" >/dev/null
-	run_as_invoking_user bash -c 'cd "$0" >/dev/null 2>&1 || true' "$build_dir" || true
 	run_as_invoking_user makepkg -si --noconfirm
 	popd >/dev/null
 	rm -rf "$build_dir"
 }
 
-install_aur_packages() {
-	local list_file="$SCRIPT_DIR/pkg-aur.txt"
-	[[ -f "$list_file" ]] || { warn "Missing pkg-aur.txt, skipping AUR package install"; return; }
-	msg "Installing AUR packages from pkg-aur.txt (using paru)"
-	mapfile -t pkgs < <(awk '{print $1}' "$list_file" | sed -e 's/#.*//' -e '/^\s*$/d')
-	if ((${#pkgs[@]})); then
-		run_as_invoking_user paru -S --needed --noconfirm --skipreview "${pkgs[@]}"
+find_aur_helper() {
+	if command -v paru >/dev/null 2>&1; then
+		echo "paru"
+	elif command -v yay >/dev/null 2>&1; then
+		echo "yay"
 	else
-		warn "No AUR packages found in pkg-aur.txt after filtering"
+		install_paru
+		echo "paru"
+	fi
+}
+
+# Ensure a single package (any repo/AUR) using the detected helper.
+ensure_pkg() {
+	local pkg=$1
+	if ! $AURHELPER -Q "$pkg" >/dev/null 2>&1; then
+		msg "Installing $pkg"
+		run_as_invoking_user $AURHELPER -S --noconfirm "$pkg"
+	else
+		msg "$pkg already installed"
+	fi
+}
+
+# Consolidated package gathering and installation
+gather_package_list() {
+	local files=()
+	[[ -f "$SCRIPT_DIR/pkg.txt" ]] && files+=("$SCRIPT_DIR/pkg.txt")
+	((${#files[@]})) || return 0
+	awk '{print $1}' "${files[@]}" \
+		| sed -e 's/#.*//' -e '/^\s*$/d' \
+		| sort -u
+}
+
+install_all_packages() {
+	mapfile -t pkgs < <(gather_package_list)
+	if ((${#pkgs[@]})); then
+		msg "Installing ${#pkgs[@]} packages via $AURHELPER"
+		# shellcheck disable=SC2086
+		run_as_invoking_user $AURHELPER -S --needed --noconfirm --skipreview ${pkgs[*]}
+	else
+		warn "No packages found to install"
 	fi
 }
 
@@ -242,20 +269,9 @@ main() {
 	refresh_keys_and_system
 	setup_prereqs
 	setup_chaotic_aur
-	ensure_paru
-	# Use paru for a unified install of both official and AUR packages
-	if [[ -f "$SCRIPT_DIR/pkg.txt" || -f "$SCRIPT_DIR/pkg-aur.txt" ]]; then
-		msg "Installing packages from pkg.txt and pkg-aur.txt via paru (non-root)"
-		mapfile -t pkgs < <( { [[ -f "$SCRIPT_DIR/pkg.txt" ]] && awk '{print $1}' "$SCRIPT_DIR/pkg.txt"; [[ -f "$SCRIPT_DIR/pkg-aur.txt" ]] && awk '{print $1}' "$SCRIPT_DIR/pkg-aur.txt"; } \
-			| sed -e 's/#.*//' -e '/^\s*$/d' | sort -u )
-		if ((${#pkgs[@]})); then
-			run_as_invoking_user paru -S --needed --noconfirm --skipreview "${pkgs[@]}"
-		else
-			warn "No packages found after parsing lists"
-		fi
-	else
-		warn "No package lists found; skipping package installation"
-	fi
+	# Detect/install an AUR helper (paru preferred, fallback to yay if present)
+	AURHELPER=$(find_aur_helper)
+	install_all_packages
 	link_dotfiles
 	enable_services
 	refresh_font_cache
