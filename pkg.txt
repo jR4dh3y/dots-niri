@@ -187,7 +187,6 @@ qt6-wayland
 thunar
 thunar-archive-plugin
 thunar-volman
-ttf-imb-plex
 tumbler
 wallust
 wget
