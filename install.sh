@@ -38,7 +38,7 @@ cat <<'EOF'
 ------------------------------------------------------------------
  |                                                              |
  |                                                              |
- |				 -- jR4dh3y dotfiles installer --               |
+ |	         -- jR4dh3y dotfiles installer --               |
  |                                                              |
  |                                                              |
 ------------------------------------------------------------------ 
@@ -227,19 +227,11 @@ link_dotfiles() {
 enable_services() {
 	msg "Enabling relevant system services when available"
 	# system services
-	for svc in ly power-profiles-daemon auto-cpufreq; do
+	for svc in ly power-profiles-daemon NetworkManager ; do
 		if systemctl list-unit-files | grep -q "^${svc}\.service"; then
 			$SUDO_CMD systemctl enable "$svc" || true
 		fi
 	done
-	# user services (best-effort)
-	if command -v systemctl >/dev/null 2>&1; then
-		loginctl enable-linger "$USER_NAME" || true
-		su - "$USER_NAME" -c 'systemctl --user daemon-reload || true'
-		for usvc in mpd swayidle swaync; do
-			su - "$USER_NAME" -c "systemctl --user enable --now ${usvc}.service" || true
-		done
-	fi
 }
 
 refresh_font_cache() {
@@ -271,11 +263,12 @@ main() {
 	setup_chaotic_aur
 	# Detect/install an AUR helper (paru preferred, fallback to yay if present)
 	AURHELPER=$(find_aur_helper)
+	refresh_font_cache
+	enable_services
 	install_all_packages
 	link_dotfiles
-	enable_services
-	refresh_font_cache
 	print_post_install_notes
+	wallpaper ~/.local/share/wallpapers/lucy.jpeg
 }
 
 main "$@"
