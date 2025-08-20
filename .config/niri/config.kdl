@@ -26,8 +26,8 @@ input {
     touchpad {
         // off
         tap
-        // dwt
-        // dwtp
+        dwt
+        dwtp
         // drag false
         // drag-lock
         natural-scroll
@@ -40,8 +40,8 @@ input {
     mouse {
         // off
         // natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
+        accel-speed 0
+        accel-profile "flat"
         // scroll-method "no-scroll"
     }
 
@@ -200,7 +200,7 @@ layout {
     // You can enable drop shadows for windows.
     shadow {
         // Uncomment the next line to enable shadows.
-        // on
+        on
 
         // By default, the shadow draws only around its window, and not behind it.
         // Uncomment this setting to make the shadow draw behind its window.
@@ -257,6 +257,7 @@ spawn-at-startup "dunst"
 spawn-at-startup "waybar"
 spawn-at-startup "swww-daemon"
 
+
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
 // If the client will specifically ask for CSD, the request will be honored.
 // Additionally, clients will be informed that they are tiled, removing some client-side rounded corners.
@@ -298,8 +299,15 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"^(code|Code|VSCodium|zen-browser|google-chrome|chromium|firefox|discord|steam)$"#
+    match app-id=r#"^(code|Code|VSCodium|zen|google-chrome|chromium|firefox|discord|steam)$"#
     default-column-width { proportion 1.0; }
+}
+
+window-rule {
+    // This rule will match all windows with the app-id "org.gnome.Nautilus"
+    // and set their default column width to 0.5 of the output width.
+    match app-id="com.example.WallpaperApp"
+    open-floating true
 }
 
 // Open the Firefox picture-in-picture player as floating by default.
@@ -370,8 +378,10 @@ binds {
     // or do a four-finger swipe up on a touchpad.
     Mod+Tab repeat=false { toggle-overview; }
 
-    Mod+Q { close-window; }
+    // Launch Wallpaper App {testing}
+    Mod+Shift+W { spawn "/home/radhey/code/wallgui/dist/wallgui/wallgui"; }
 
+    Mod+Q { close-window; }
     Mod+Left  { focus-column-left; }
     Mod+Down  { focus-window-down; }
     Mod+Up    { focus-window-up; }
