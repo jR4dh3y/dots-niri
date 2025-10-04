@@ -80,7 +80,7 @@ input {
     mode "1920x1080@144"
 
     // You can use integer or fractional scale, for example use 1.5 for 150% scale.
-    scale 1.0
+    scale 1
 
     // Transform allows to rotate the output counter-clockwise, valid values are:
     // normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
@@ -338,6 +338,59 @@ window-rule {
     clip-to-geometry true
 }
 
+window-rule {
+    match app-id="floating"
+    open-floating true
+    min-width 800
+    min-height 700
+    max-width 800
+    max-height 700
+    geometry-corner-radius 0
+    clip-to-geometry false
+}
+window-rule {
+    match app-id="menu"
+    open-floating true
+    min-width 300
+    min-height 250
+    max-width 300
+    max-height 250
+    geometry-corner-radius 0
+    clip-to-geometry false
+}
+window-rule {
+    match app-id="clipboard"
+    open-floating true
+    min-width 900
+    min-height 600
+    max-width 900
+    max-height 600
+    geometry-corner-radius 0
+    clip-to-geometry false
+}
+
+window-rule {
+    match app-id="port"
+    open-floating true
+    min-width 850
+    min-height 400
+    max-width 850
+    max-height 400
+    geometry-corner-radius 0
+    clip-to-geometry false
+}
+
+window-rule {
+    match app-id="kill"
+    open-floating true
+    min-width 700
+    min-height 500
+    max-width 700
+    max-height 500
+    geometry-corner-radius 0
+    clip-to-geometry false
+}
+
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
     // in the end. To find an XKB name for a particular key, you may use a program
@@ -360,8 +413,15 @@ binds {
     Mod+W hotkey-overlay-title="Open a Web Browser: firefox" { spawn "zen-browser"; }
     Mod+E hotkey-overlay-title="Open a File Manager: thunar" { spawn "thunar"; }
     Mod+C hotkey-overlay-title="Open a Code Editor: code" { spawn "code"; }
-    Mod+X {spawn "wlogout";}
-	// You can also use a shell. Do this if you need pipes, multiple commands, etc.
+    Mod+X {spawn "kitty" "--class" "menu" "/home/radhey/.config/scripts/power-menu.sh";}
+    Mod+I {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/install.sh"; }
+    Mod+O {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/install-aur.sh"; }
+    Mod+U {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/uninstall.sh"; }
+    Mod+V {spawn "kitty" "--class" "clipboard" "/home/radhey/.config/scripts/clipboard-manager.sh";}
+    Mod+P {spawn "kitty" "--class" "port" "/home/radhey/.config/scripts/port-manager.sh";}
+    Mod+K { spawn "kitty" "--class" "kill" "/home/radhey/.config/scripts/process-killer.sh";}
+	Mod+L { spawn "hyprlock" "-c" "/home/radhey/code/dots-niri/.config/hypr/hyprlock-static.conf"; }
+    // You can also use a shell. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument in the end.
     // Mod+T { spawn "bash" "-c" "notify-send hello && exec alacritty"; }
 
@@ -379,7 +439,7 @@ binds {
     Mod+Tab repeat=false { toggle-overview; }
 
     // Launch Wallpaper App {testing}
-    Mod+Shift+W { spawn "/home/radhey/code/wallgui/dist/wallgui/wallgui"; }
+    Mod+Shift+W { spawn "/home/radhey/code/wallgui/wallgui.py"; }
 
     Mod+Q { close-window; }
     Mod+Left  { focus-column-left; }
@@ -489,15 +549,15 @@ binds {
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
-    Mod+Ctrl+1 { move-column-to-workspace 1; }
-    Mod+Ctrl+2 { move-column-to-workspace 2; }
-    Mod+Ctrl+3 { move-column-to-workspace 3; }
-    Mod+Ctrl+4 { move-column-to-workspace 4; }
-    Mod+Ctrl+5 { move-column-to-workspace 5; }
-    Mod+Ctrl+6 { move-column-to-workspace 6; }
-    Mod+Ctrl+7 { move-column-to-workspace 7; }
-    Mod+Ctrl+8 { move-column-to-workspace 8; }
-    Mod+Ctrl+9 { move-column-to-workspace 9; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+1 { move-window-to-workspace 1; }
@@ -547,8 +607,8 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // Move the focused window between the floating and the tiling layout.
-    Mod+V       { toggle-window-floating; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    Mod+G      { toggle-window-floating; }
+    Mod+Shift+G { switch-focus-between-floating-and-tiling; }
 
     // Toggle tabbed column display mode.
     // Windows in this column will appear as vertical tabs,
@@ -583,4 +643,7 @@ binds {
     // Powers off the monitors. To turn them back on, do any input like
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
+    
+    // Pick color from screen
+    Mod+Shift+C { spawn "sh" "-c" "~/.config/scripts/pick-color.sh"; }
 }

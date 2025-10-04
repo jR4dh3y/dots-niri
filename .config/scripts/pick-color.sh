@@ -1,7 +1,7 @@
 #!/bin/env bash
 
-## Copyright (C) 2020-2022 Aditya Shakya <adi1090x@gmail.com>
-## Everyone is permitted to copy and distribute copies of this file under GNU-GPL3
+## Copyright (C) 2s020-2022 Aditya Shakya <adi1090x@gmail.com>
+## Everyone is permitted to copy and ditribute copies of this file under GNU-GPL3
 
 ## Simple Script To Pick Color Quickly.
 

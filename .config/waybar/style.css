@@ -2,7 +2,7 @@
    Importing colors from theme directory
 */
 
-@import url("../themes/colors-waybar.css");
+@import url("../themes/global-colors.css");
 
 *{
    font-size: 15px;
