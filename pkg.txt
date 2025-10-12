@@ -193,4 +193,5 @@ wget
 wireplumber
 xarchiver
 xdg-desktop-portal-hyprland
+xdg-desktop-portal-gnome
 xfce4-settings

@@ -103,7 +103,7 @@ input {
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 5
+    gaps 3
 
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
@@ -151,7 +151,7 @@ layout {
         // off
 
         // How many logical pixels the ring extends out from the windows.
-        width 2
+        width 1
 
         // Colors can be set in a variety of ways:
         // - CSS named colors: "red"
@@ -304,6 +304,11 @@ window-rule {
 }
 
 window-rule {
+    match app-id="chrome-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
+    default-column-width { proportion 0.7; }
+}
+
+window-rule {
     // This rule will match all windows with the app-id "org.gnome.Nautilus"
     // and set their default column width to 0.5 of the output width.
     match app-id="com.example.WallpaperApp"
@@ -413,14 +418,14 @@ binds {
     Mod+W hotkey-overlay-title="Open a Web Browser: firefox" { spawn "zen-browser"; }
     Mod+E hotkey-overlay-title="Open a File Manager: thunar" { spawn "thunar"; }
     Mod+C hotkey-overlay-title="Open a Code Editor: code" { spawn "code"; }
-    Mod+X {spawn "kitty" "--class" "menu" "/home/radhey/.config/scripts/power-menu.sh";}
-    Mod+I {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/install.sh"; }
-    Mod+O {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/install-aur.sh"; }
-    Mod+U {spawn "kitty" "--class" "floating" "/home/radhey/.config/scripts/uninstall.sh"; }
-    Mod+V {spawn "kitty" "--class" "clipboard" "/home/radhey/.config/scripts/clipboard-manager.sh";}
-    Mod+P {spawn "kitty" "--class" "port" "/home/radhey/.config/scripts/port-manager.sh";}
-    Mod+K { spawn "kitty" "--class" "kill" "/home/radhey/.config/scripts/process-killer.sh";}
-	Mod+L { spawn "hyprlock" "-c" "/home/radhey/code/dots-niri/.config/hypr/hyprlock-static.conf"; }
+    Mod+X hotkey-overlay-title="Power Menu" {spawn "kitty" "--class" "menu" "~/.config/scripts/power-menu.sh";}
+    Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" "~/.config/scripts/install.sh"; }
+    Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" "~/.config/scripts/install-aur.sh"; }
+    Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" "~/.config/scripts/uninstall.sh"; }
+    Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" "~/.config/scripts/clipboard-manager.sh";}
+    Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" "~/.config/scripts/port-manager.sh";}
+    Mod+K hotkey-overlay-title="Process Killer" { spawn "kitty" "--class" "kill" "~/.config/scripts/process-killer.sh";}
+	Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock" "-c" "~/.config/hypr/hyprlock-static.conf"; }
     // You can also use a shell. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument in the end.
     // Mod+T { spawn "bash" "-c" "notify-send hello && exec alacritty"; }
@@ -436,10 +441,10 @@ binds {
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,
     // or do a four-finger swipe up on a touchpad.
-    Mod+Tab repeat=false { toggle-overview; }
+    Mod+Tab repeat=true { toggle-overview; }
 
     // Launch Wallpaper App {testing}
-    Mod+Shift+W { spawn "/home/radhey/code/wallgui/wallgui.py"; }
+    Mod+Shift+W hotkey-overlay-title="Wallpaper Manager" { spawn "/home/radhey/code/wallgui/wallgui.py"; }
 
     Mod+Q { close-window; }
     Mod+Left  { focus-column-left; }
@@ -645,5 +650,5 @@ binds {
     Mod+Shift+P { power-off-monitors; }
     
     // Pick color from screen
-    Mod+Shift+C { spawn "sh" "-c" "~/.config/scripts/pick-color.sh"; }
+    Mod+Shift+C hotkey-overlay-title="Color Picker"{ spawn "sh" "-c" "~/.config/scripts/pick-color.sh"; }
 }

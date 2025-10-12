@@ -1,5 +1,3 @@
-# include colors.conf
-
 # remove predefined shortcuts
 clear_all_shortcuts yes
 
@@ -22,10 +20,9 @@ touch_scroll_multiplier 6.0
 
 # selection
 copy_on_select clipboard
-select_by_word_characters :,│`|:\"'()[]{}<>\t
+select_by_word_characters :,│`|:\"' ()[]{}<>\t
 
-#window
-
+# window
 background_opacity 0.90
 window_padding_width 10 10
 window_margin_width 0
@@ -60,4 +57,3 @@ font_size 12.0
 # keybinds nahui
 
 map ctrl+shift+v paste_from_clipboard
-
