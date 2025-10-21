@@ -163,10 +163,24 @@ ensure_pkg() {
 	fi
 }
 
+# Detect if system has NVIDIA GPU
+has_nvidia_gpu() {
+	lspci 2>/dev/null | grep -i nvidia >/dev/null 2>&1 && return 0
+	command -v nvidia-smi >/dev/null 2>&1 && return 0
+	return 1
+}
+
 # Consolidated package gathering and installation
 gather_package_list() {
 	local files=()
 	[[ -f "$SCRIPT_DIR/pkg.txt" ]] && files+=("$SCRIPT_DIR/pkg.txt")
+	
+	# Include NVIDIA packages if GPU detected
+	if has_nvidia_gpu; then
+		msg "NVIDIA GPU detected, including NVIDIA packages"
+		[[ -f "$SCRIPT_DIR/pkg-nvi.txt" ]] && files+=("$SCRIPT_DIR/pkg-nvi.txt")
+	fi
+	
 	((${#files[@]})) || return 0
 	awk '{print $1}' "${files[@]}" \
 		| sed -e 's/#.*//' -e '/^\s*$/d' \

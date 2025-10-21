@@ -27,7 +27,6 @@ discord
 duf
 dunst
 efibootmgr
-envycontrol
 fastfetch
 feh
 fisher
@@ -50,9 +49,6 @@ material-icon-theme-git
 mpd
 mpv
 network-manager-applet
-nvidia-dkms
-nvidia-prime
-nvtop
 nwg-displays
 nwg-look
 obs-studio
@@ -152,7 +148,6 @@ wl-mirror
 wlogout
 xfce4-settings
 yarn
-yazi
 zen-browser-bin
 adw-gtk-theme
 blueberry
