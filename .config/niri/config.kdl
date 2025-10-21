@@ -412,12 +412,12 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
-    Mod+Return hotkey-overlay-title="Open a Terminal: alacritty" { spawn "kitty"; }
-    Mod+A hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "hyprlock"; }
-    Mod+W hotkey-overlay-title="Open a Web Browser: firefox" { spawn "zen-browser"; }
-    Mod+E hotkey-overlay-title="Open a File Manager: thunar" { spawn "thunar"; }
-    Mod+C hotkey-overlay-title="Open a Code Editor: code" { spawn "code"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
+    Mod+A hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
+    // Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "hyprlock"; }
+    Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
+    Mod+E hotkey-overlay-title="Open a File Manager" { spawn "thunar"; }
+    Mod+C hotkey-overlay-title="Open a Code Editor" { spawn "code"; }
     Mod+X hotkey-overlay-title="Power Menu" {spawn "kitty" "--class" "menu" ".config/scripts/power-menu.sh";}
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
@@ -425,7 +425,7 @@ binds {
     Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" ".config/scripts/clipboard-manager.sh";}
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
     Mod+K hotkey-overlay-title="Process Killer" { spawn "kitty" "--class" "kill" ".config/scripts/process-killer.sh";}
-	Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock" "-c" ".config/hypr/hyprlock-static.conf"; }
+	Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock"; }
     // You can also use a shell. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument in the end.
     // Mod+T { spawn "bash" "-c" "notify-send hello && exec alacritty"; }
