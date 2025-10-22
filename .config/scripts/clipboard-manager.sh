@@ -36,6 +36,21 @@ ensure_watchers() {
 
 ensure_watchers
 
+close_kitty_window_on_exit() {
+    [[ -n "${KITTY_WINDOW_ID:-}" ]] || return
+
+    local parent_pid parent_comm
+    parent_pid=$(ps -p $$ -o ppid= | awk '{print $1}')
+    [[ -n "$parent_pid" ]] || return
+
+    parent_comm=$(ps -p "$parent_pid" -o comm= | awk '{print $1}')
+    if [[ "$parent_comm" == "kitty" ]]; then
+        kill -s SIGTERM "$parent_pid" 2>/dev/null || true
+    fi
+}
+
+trap close_kitty_window_on_exit EXIT
+
 # FZF configuration
 fzf_args=(
     --height=100%
@@ -89,3 +104,5 @@ if [[ -n "$selection" ]]; then
 else
     echo "No selection made"
 fi
+
+exit 0
