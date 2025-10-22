@@ -103,7 +103,7 @@ input {
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 3
+    gaps 5
 
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
@@ -256,6 +256,7 @@ layout {
 spawn-at-startup "dunst"
 spawn-at-startup "waybar"
 spawn-at-startup "swww-daemon"
+spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 
 
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
