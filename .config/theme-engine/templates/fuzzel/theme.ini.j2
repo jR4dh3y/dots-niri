@@ -1,0 +1,19 @@
+{# Fuzzel Theme Template
+   Path: ~/.config/theme-engine/templates/fuzzel/theme.ini.j2
+   Generated for: {{ meta.name }}
+#}
+
+# FUZZEL - {{ meta.name }}
+# {{ meta.description }}
+# Generated: {{ generation_date }}
+# DO NOT EDIT - This file is auto-generated from theme templates
+# Edit the YAML theme file instead at: ~/.config/theme-engine/themes/
+
+[colors]
+background={{ colors.background.primary | strip_hash }}ff
+text={{ colors.foreground.primary | strip_hash }}ff
+selection={{ colors.ui.selection | strip_hash }}ff
+selection-text={{ colors.background.primary | strip_hash }}ff
+border={{ colors.ui.border | strip_hash }}DD
+match={{ colors.accent.secondary | strip_hash }}ff
+selection-match={{ colors.accent.secondary | strip_hash }}ff

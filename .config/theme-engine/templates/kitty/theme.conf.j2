@@ -1,0 +1,41 @@
+{# Kitty Theme Template
+   Path: ~/.config/theme-engine/templates/kitty/theme.conf.j2
+   Generated for: {{ meta.name }}
+#}
+
+# KITTY - {{ meta.name }}
+# {{ meta.description }}
+# Generated: {{ generation_date }}
+# DO NOT EDIT - This file is auto-generated from theme templates
+# Edit the YAML theme file instead at: ~/.config/theme-engine/themes/
+
+background {{ colors.background.primary }}
+foreground {{ colors.foreground.primary }}
+
+# Standard colors (0-7)
+color0  {{ colors.terminal.color0 }}
+color1  {{ colors.terminal.color1 }}
+color2  {{ colors.terminal.color2 }}
+color3  {{ colors.terminal.color3 }}
+color4  {{ colors.terminal.color4 }}
+color5  {{ colors.terminal.color5 }}
+color6  {{ colors.terminal.color6 }}
+color7  {{ colors.terminal.color7 }}
+
+# Bright colors (8-15)
+color8  {{ colors.terminal.color8 }}
+color9  {{ colors.terminal.color9 }}
+color10 {{ colors.terminal.color10 }}
+color11 {{ colors.terminal.color11 }}
+color12 {{ colors.terminal.color12 }}
+color13 {{ colors.terminal.color13 }}
+color14 {{ colors.terminal.color14 }}
+color15 {{ colors.terminal.color15 }}
+
+# Selection colors
+selection_background {{ colors.ui.selection }}
+selection_foreground {{ colors.background.primary }}
+
+# Cursor
+cursor {{ colors.ui.cursor }}
+cursor_text_color {{ colors.background.primary }}

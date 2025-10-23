@@ -1,0 +1,119 @@
+# ~/.config/theme-engine/themes/myoriginal.yaml
+# Original NvChad-inspired theme (Tokyo Night style)
+# Generated from existing color definitions: 2025-10-23
+
+meta:
+  name: "Original"
+  author: "Radhey"
+  description: "NvChad-inspired theme with cool blue and green accents"
+  version: "1.0"
+  created: "2025-10-23"
+
+colors:
+  # Base colors - primary background and foreground
+  background:
+    primary: "#1A1B26"      # Deep dark
+    secondary: "#414868"    # Tray/secondary bg
+    tertiary: "#15202B"     # Darker variant
+  
+  foreground:
+    primary: "#C0CAF5"      # Light lavender
+    secondary: "#B0BEEA"    # Medium lavender
+    dim: "#8A94C8"          # Dimmed text
+  
+  # Accent colors
+  accent:
+    primary: "#9ECE6A"      # Green
+    secondary: "#7AA2F7"    # Blue
+    tertiary: "#BB9AF7"     # Purple
+  
+  # Semantic colors
+  semantic:
+    success: "#9ECE6A"      # Green
+    warning: "#E0AF68"      # Yellow
+    error: "#F7768E"        # Red
+    info: "#7AA2F7"         # Blue
+  
+  # UI elements
+  ui:
+    border: "#414868"
+    selection: "#7AA2F7"
+    cursor: "#C0CAF5"
+    highlight: "#7AA2F7"
+  
+  # Terminal palette (16 colors)
+  terminal:
+    color0: "#15202B"       # Black
+    color1: "#F7768E"       # Red
+    color2: "#9ECE6A"       # Green
+    color3: "#E0AF68"       # Yellow
+    color4: "#7AA2F7"       # Blue
+    color5: "#BB9AF7"       # Magenta
+    color6: "#7DCFFF"       # Cyan
+    color7: "#C0CAF5"       # White
+    color8: "#414868"       # Bright Black
+    color9: "#F7768E"       # Bright Red
+    color10: "#9ECE6A"      # Bright Green
+    color11: "#E0AF68"      # Bright Yellow
+    color12: "#7AA2F7"      # Bright Blue
+    color13: "#BB9AF7"      # Bright Magenta
+    color14: "#7DCFFF"      # Bright Cyan
+    color15: "#C0CAF5"      # Bright White
+  
+  # App-specific color mappings
+  app_overrides:
+    waybar:
+      tray: "#414868"
+      workspace_active: "#7AA2F7"
+      workspace_inactive: "#C0CAF5"
+      accent: "#9ECE6A"
+      caution: "#E0AF68"
+      urgent: "#F7768E"
+      first_right: "#7DCFFF"
+      middle_right: "#F7768E"
+      last_right: "#BB9AF7"
+      funny_pastel: "#FFB7B2"
+    
+    fuzzel:
+      selection: "#7AA2F7"
+      selection_text: "#C0CAF5"
+      match: "#9ECE6A"
+      selection_match: "#9ECE6A"
+    
+    wlogout:
+      selection: "#7AA2F7"
+      text: "#C0CAF5"
+    
+    niri:
+      primary: "#7AA2F7"
+      secondary: "#BB9AF7"
+      accent: "#9ECE6A"
+      border: "#414868"
+      highlight: "#7AA2F7"
+      success: "#9ECE6A"
+      warning: "#E0AF68"
+      error: "#F7768E"
+      info: "#7AA2F7"
+    
+    hyprlock:
+      text_color: "#C0CAF5"
+      entry_background_color: "#414868"
+      entry_border_color: "#9ECE6A"
+      entry_color: "#C0CAF5"
+      check_color: "#BB9AF7"
+      fail_color: "#F7768E"
+      caps_color: "#E0AF68"
+      highlight_text: "#1A1B26"
+      background_color: "#1A1B26"
+      success_color: "#9ECE6A"
+      warning_color: "#E0AF68"
+      error_color: "#F7768E"
+    
+    dunst:
+      background: "#1A1B26"
+      foreground: "#C0CAF5"
+      frame_color: "#414868"
+      highlight: "#9ECE6A"
+      urgency_low_bg: "#414868"
+      urgency_normal_bg: "#7AA2F7"
+      urgency_critical_bg: "#F7768E"

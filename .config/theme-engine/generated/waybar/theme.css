@@ -1,0 +1,28 @@
+
+/* WAYBAR - Original
+ * NvChad-inspired theme with cool blue and green accents
+ * Generated: 
+ * DO NOT EDIT - This file is auto-generated from theme templates
+ * Edit the YAML theme file instead at: ~/.config/theme-engine/themes/
+ */
+
+@define-color bg_color #1A1B26;
+@define-color fg_color #C0CAF5;
+@define-color tray_color #414868;
+@define-color accent_color #9ECE6A;
+@define-color highlight_color #7AA2F7;
+@define-color invert_color #1A1B26;
+@define-color caution_color #E0AF68;
+@define-color urgent_color #F7768E;
+@define-color middle_color #9ECE6A;
+@define-color first_right_color #7AA2F7;
+@define-color middle_right_color #F7768E;
+@define-color last_right_color #BB9AF7;
+@define-color funny_pastel_color #FFB7B2;
+
+/* Nonchalant Purp specific colors */
+@define-color text_muted #B0BEEA;
+@define-color border_color #414868;
+@define-color highlight_text #1A1B26;
+@define-color selection_color #7AA2F7;
+@define-color surface_color #414868;

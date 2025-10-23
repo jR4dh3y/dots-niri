@@ -1,0 +1,32 @@
+{# Waybar Theme Template
+   Path: ~/.config/theme-engine/templates/waybar/theme.css.j2
+   Generated for: {{ meta.name }}
+#}
+
+/* WAYBAR - {{ meta.name }}
+ * {{ meta.description }}
+ * Generated: {{ generation_date }}
+ * DO NOT EDIT - This file is auto-generated from theme templates
+ * Edit the YAML theme file instead at: ~/.config/theme-engine/themes/
+ */
+
+@define-color bg_color {{ colors.background.primary }};
+@define-color fg_color {{ colors.foreground.primary }};
+@define-color tray_color {{ colors.background.secondary }};
+@define-color accent_color {{ colors.accent.primary }};
+@define-color highlight_color {{ colors.accent.secondary }};
+@define-color invert_color {{ colors.background.primary }};
+@define-color caution_color {{ colors.semantic.warning }};
+@define-color urgent_color {{ colors.semantic.error }};
+@define-color middle_color {{ colors.accent.primary }};
+@define-color first_right_color {{ colors.accent.secondary }};
+@define-color middle_right_color {{ colors.semantic.error }};
+@define-color last_right_color {{ colors.accent.tertiary }};
+@define-color funny_pastel_color {{ colors.app_overrides.waybar.funny_pastel or colors.semantic.warning }};
+
+/* Nonchalant Purp specific colors */
+@define-color text_muted {{ colors.foreground.secondary }};
+@define-color border_color {{ colors.ui.border }};
+@define-color highlight_text {{ colors.background.primary }};
+@define-color selection_color {{ colors.ui.selection }};
+@define-color surface_color {{ colors.background.secondary }};

@@ -1,0 +1,7 @@
+# Theme Engine Python Dependencies
+# Install with: pip install -r requirements.txt
+
+Jinja2>=3.1.0      # Template engine
+PyYAML>=6.0        # YAML parsing
+colorama>=0.4.6    # Colored terminal output
+click>=8.1.0       # CLI framework

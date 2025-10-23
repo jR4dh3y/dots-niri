@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
+# Wlogout launcher - Uses Phase 6 theme engine generated CSS
+
 A_1080=400
 B_1080=400
+
+# Theme engine generated CSS path
+WLOGOUT_THEME_CSS="$HOME/.config/wlogout/themes/active.css"
+WLOGOUT_LAYOUT="$HOME/.config/wlogout/layout"
+WLOGOUT_FALLBACK_CSS="$HOME/.config/wlogout/nova.css"
 
 # Check if wlogout is already running
 if pgrep -x "wlogout" > /dev/null; then
@@ -56,4 +63,8 @@ fi
 top_margin=$(awk -v base="$A_1080" -v scale="$display_scale" -v res="$resolution" 'BEGIN { if (res > 0) printf "%.0f", base * 1080 * scale / res; else print 0 }')
 bottom_margin=$(awk -v base="$B_1080" -v scale="$display_scale" -v res="$resolution" 'BEGIN { if (res > 0) printf "%.0f", base * 1080 * scale / res; else print 0 }')
 
-wlogout -C "$HOME/.config/wlogout/nova.css" -l "$HOME/.config/wlogout/layout" --protocol layer-shell -b 5 -T "$top_margin" -B "$bottom_margin" &
+# Use generated theme CSS if available, otherwise fallback to nova.css
+# wlogout always needs nova.css for the button styling, it imports the colors from active.css
+WLOGOUT_CSS="$HOME/.config/wlogout/nova.css"
+
+wlogout -C "$WLOGOUT_CSS" -l "$WLOGOUT_LAYOUT" --protocol layer-shell -b 5 -T "$top_margin" -B "$bottom_margin" &

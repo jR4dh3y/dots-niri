@@ -1,0 +1,122 @@
+# ~/.config/theme-engine/themes/nonchalant-purp.yaml
+# Sophisticated dark theme with soft violet-magenta accents
+# Generated from existing color definitions: 2025-10-23
+
+meta:
+  name: "Nonchalant Purp"
+  author: "Radhey"
+  description: "Sophisticated dark theme with violet-magenta accents and lime highlights"
+  version: "1.0"
+  created: "2025-10-23"
+
+colors:
+  # Base colors - primary background and foreground
+  background:
+    primary: "#1e1e20"      # Deep dark graphite
+    secondary: "#2a2a2c"    # Secondary background
+    tertiary: "#3a3a3d"     # Tertiary/borders
+  
+  foreground:
+    primary: "#e6dfef"      # Light purple-grey
+    secondary: "#9c96ad"    # Medium purple-grey
+    dim: "#7a7582"          # Dimmed text
+  
+  # Accent colors
+  accent:
+    primary: "#c59edc"      # Soft purple-magenta
+    secondary: "#c3fb5b"    # Vibrant lime-green
+    tertiary: "#ffb86c"     # Soft orange
+  
+  # Semantic colors
+  semantic:
+    success: "#c3fb5b"      # Lime green
+    warning: "#ffb86c"      # Orange
+    error: "#ff6e79"        # Coral red
+    info: "#c59edc"         # Purple
+  
+  # UI elements
+  ui:
+    border: "#c59edc"       # Purple borders
+    selection: "#4a3b5f"    # Dark purple selection
+    cursor: "#e6dfef"       # Light cursor
+    highlight: "#c3fb5b"    # Lime highlight
+  
+  # Terminal palette (16 colors)
+  terminal:
+    color0: "#1e1e20"       # Black
+    color1: "#ff6e79"       # Red
+    color2: "#c3fb5b"       # Green
+    color3: "#ffb86c"       # Yellow
+    color4: "#c59edc"       # Blue
+    color5: "#c59edc"       # Magenta
+    color6: "#c59edc"       # Cyan
+    color7: "#e6dfef"       # White
+    color8: "#3a3a3d"       # Bright Black
+    color9: "#ff6e79"       # Bright Red
+    color10: "#c3fb5b"      # Bright Green
+    color11: "#ffb86c"      # Bright Yellow
+    color12: "#c59edc"      # Bright Blue
+    color13: "#c59edc"      # Bright Magenta
+    color14: "#c59edc"      # Bright Cyan
+    color15: "#e6dfef"      # Bright White
+  
+  # App-specific color mappings
+  app_overrides:
+    waybar:
+      tray: "#2a2a2c"
+      workspace_active: "#c3fb5b"
+      workspace_inactive: "#e6dfef"
+      accent: "#c59edc"
+      caution: "#ffb86c"
+      urgent: "#ff6e79"
+      first_right: "#c59edc"
+      middle_right: "#ff6e79"
+      last_right: "#c3fb5b"
+      funny_pastel: "#ffb86c"
+      text_muted: "#9c96ad"
+      border_color: "#3a3a3d"
+      highlight_text: "#1e1e20"
+    
+    fuzzel:
+      selection: "#c59edc"
+      selection_text: "#1e1e20"
+      match: "#c3fb5b"
+      selection_match: "#c3fb5b"
+    
+    wlogout:
+      selection: "#c59edc"
+      text: "#e6dfef"
+    
+    niri:
+      primary: "#c59edc"
+      secondary: "#c3fb5b"
+      accent: "#ffb86c"
+      border: "#3a3a3d"
+      highlight: "#c3fb5b"
+      success: "#c3fb5b"
+      warning: "#ffb86c"
+      error: "#ff6e79"
+      info: "#c59edc"
+    
+    hyprlock:
+      text_color: "#e6dfef"
+      entry_background_color: "#2a2a2c"
+      entry_border_color: "#c3fb5b"
+      entry_color: "#e6dfef"
+      check_color: "#c59edc"
+      fail_color: "#ff6e79"
+      caps_color: "#ffb86c"
+      highlight_text: "#1e1e20"
+      background_color: "#1e1e20"
+      success_color: "#c3fb5b"
+      warning_color: "#ffb86c"
+      error_color: "#ff6e79"
+    
+    dunst:
+      background: "#1e1e20"
+      foreground: "#e6dfef"
+      frame_color: "#3a3a3d"
+      highlight: "#c3fb5b"
+      urgency_low_bg: "#2a2a2c"
+      urgency_normal_bg: "#c59edc"
+      urgency_critical_bg: "#ff6e79"

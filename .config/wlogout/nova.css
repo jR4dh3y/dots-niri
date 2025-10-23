@@ -1,5 +1,5 @@
 /* Import global colors from theme */
-@import url("../themes/global-colors.css");
+@import url("./themes/active.css");
 
 window {
     font-family: Fira Code Medium;
