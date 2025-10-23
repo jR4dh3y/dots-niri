@@ -1,0 +1,29 @@
+/* NONCHALANT PURP - Color Profile
+ * 
+ * A sophisticated dark theme with soft violet-magenta accents
+ * and vibrant lime highlights. Easy on the eyes with excellent
+ * contrast and readability.
+ *
+ * Created: 2025-10-23
+ * Base: Deep graphite with soft purple tones
+ */
+
+@define-color bg_color #1e1e20;
+@define-color invert_color #1e1e20;
+@define-color tray_color #2a2a2c; 
+@define-color fg_color #e6dfef;
+@define-color accent_color #c59edc;
+@define-color highlight_color #c3fb5b;
+@define-color caution_color #ffb86c;
+@define-color urgent_color #ff6e79;
+@define-color waybar_white #e6dfef;
+@define-color waybar_red #ff6e79;
+@define-color waybar_purple #c59edc;
+@define-color waybar_green #c3fb5b;
+@define-color highlight_text #1e1e20;
+
+/* Additional colors for this profile */
+@define-color text_muted #9c96ad;
+@define-color border_color #3a3a3d;
+@define-color selection_color #4a3b5f;
+@define-color surface_color #2a2a2c;

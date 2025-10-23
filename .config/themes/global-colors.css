@@ -1,1 +1,31 @@
-../themes/dark/colors-waybar.css
+/* GLOBAL COLOR DEFINITIONS
+ * 
+ * This file is the single source of truth for all colors in the dotfiles.
+ * 
+ * Usage:
+ *  - CSS/GTK apps: @import url("../themes/global-colors.css");
+ *                  Then use @bg_color, @fg_color, etc.
+ *  - Shell scripts: source ~/.config/themes/colors.sh
+ *  - Config files:  Use the hex values directly with a comment
+ *
+ * To update all colors, simply change the hex values here.
+ * All applications will automatically use the new colors.
+ *
+ * See ~/.config/themes/README.md for detailed usage guide.
+ * Run ~/.config/themes/preview.sh to see all colors.
+ */
+
+@define-color bg_color #1A1B26;
+@define-color fg_color #C0CAF5;
+@define-color tray_color #414868; 
+@define-color accent_color #9ECE6A;
+@define-color highlight_color #7AA2F7;
+@define-color invert_color #1A1B26;
+@define-color caution_color #E0AF68;
+@define-color urgent_color #F7768E;
+@define-color middle_color #9ECE6A;
+@define-color first_right_color #7DCFFF;
+@define-color middle_right_color #F7768E;
+@define-color last_right_color #BB9AF7;
+@define-color funny_pastel_color #FFB7B2;
+

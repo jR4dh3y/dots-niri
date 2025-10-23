@@ -1,7 +1,10 @@
+/* Import global colors from theme */
+@import url("../themes/global-colors.css");
+
 window {
     font-family: Fira Code Medium;
     font-size: 16pt;
-    color:  #C0CAF5; /* text */
+    color: @fg_color;
     background-color: rgba(23, 24, 25, 0.8);
 }
    
@@ -21,7 +24,7 @@ button {
 button:focus {
     background-size: 50%;
     box-shadow: 0 0 10px 3px rgba(0,0,0,.4);
-    background-color: #BB9AF7;
+    background-color: @highlight_color;
     color: transparent;
     transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.5s ease-in;
     outline: none;
@@ -31,8 +34,8 @@ button:focus {
 button:hover {
     background-size: 50%;
     box-shadow: 0 0 10px 3px rgba(0,0,0,.4);
-    background-color: #BB9AF7;
-    color: transparent;
+    background-color: @highlight_color;
+    color: @highlight_text;
     transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.5s ease-in;
 }
 

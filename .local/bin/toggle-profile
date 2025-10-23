@@ -1,0 +1,6 @@
+#!/bin/bash
+# Toggle Profile - Simple Wrapper
+# This is the main entry point for the toggle script
+# It uses Fuzzel for interactive profile selection
+
+~/.config/themes/toggle-profile-advanced.sh "$@"

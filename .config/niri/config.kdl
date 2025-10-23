@@ -159,10 +159,11 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        // active-color "#7fc8ff"
+        // Global colors from ~/.config/themes/global-colors.css
+        // active-color "#7AA2F7"
 
         // Color of the ring on inactive monitors.
-        inactive-color "#505050"
+        inactive-color "#414868"
 
         // You can also use gradients. They take precedence over solid colors.
         // Gradients are rendered the same as CSS linear-gradient(angle, from, to).
@@ -171,13 +172,13 @@ layout {
         // You can use any CSS linear-gradient tool on the web to set these up.
         // Changing the color space is also supported, check the wiki for more info.
         //
-        active-gradient from="#80c8ff" to="#dcbbffff" angle=45 relative-to="window"
+        active-gradient from="#7AA2F7" to="#BB9AF7" angle=45 relative-to="window"
 
         // You can also color the gradient relative to the entire view
         // of the workspace, rather than relative to just the window itself.
         // To do that, set relative-to="workspace-view".
         //
-        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+        // inactive-gradient from="#414868" to="#7AA2F7" angle=45 relative-to="workspace-view"
     }
 
     // You can also add a border. It's similar to the focus ring, but always visible.
@@ -187,14 +188,14 @@ layout {
         off
 
         width 4
-        active-color "#ffc87f"
-        inactive-color "#505050"
+        active-color "#7AA2F7"
+        inactive-color "#414868"
 
         // Color of the border around windows that request your attention.
-        urgent-color "#9b0000"
+        urgent-color "#F7768E"
 
-        // active-gradient from="#ffbb66" to="#ffc880" angle=45 relative-to="workspace-view"
-        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+        // active-gradient from="#7AA2F7" to="#BB9AF7" angle=45 relative-to="workspace-view"
+        // inactive-gradient from="#414868" to="#7AA2F7" angle=45 relative-to="workspace-view"
     }
 
     // You can enable drop shadows for windows.

@@ -2,7 +2,7 @@
    Importing colors from theme directory
 */
 
-@import url("../themes/global-colors.css");
+@import url("../themes/nonchalant-purp.css");
 
 *{
    font-size: 15px;
