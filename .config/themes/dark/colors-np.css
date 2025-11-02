@@ -1,0 +1,13 @@
+/* Color Palette */
+@define-color bg_color #1e1e20;
+@define-color surface_color #2a2a2c;
+@define-color primary_accent #c59edc;
+@define-color secondary_accent #e6dfef;
+@define-color highlight_color #c3fb5b;
+@define-color warning_color #ffb86c;
+@define-color error_color #ff6e79;
+@define-color text_main #dcd9e7;
+@define-color text_muted #9c96ad;
+@define-color border_color #3a3a3d;
+@define-color selection_color #4a3b5f;
+

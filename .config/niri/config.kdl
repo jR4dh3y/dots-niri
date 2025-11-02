@@ -148,7 +148,7 @@ layout {
     // You can change how the focus ring looks.
     focus-ring {
         // Uncomment this line to disable the focus ring.
-        // off
+        
 
         // How many logical pixels the ring extends out from the windows.
         width 1
@@ -186,7 +186,7 @@ layout {
         // If you enable the border, you probably want to disable the focus ring.
         off
 
-        width 4
+        width 1
         active-color "#ffc87f"
         inactive-color "#505050"
 
@@ -256,7 +256,8 @@ layout {
 spawn-at-startup "dunst"
 spawn-at-startup "waybar"
 spawn-at-startup "swww-daemon"
-spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+spawn-at-startup "kitty" "clipse -listen"
+
 
 
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
@@ -288,16 +289,6 @@ animations {
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules
-
-// Work around WezTerm's initial configure bug
-// by setting an empty default-column-width.
-window-rule {
-    // This regular expression is intentionally made as specific as possible,
-    // since this is the default config, and we want no false positives.
-    // You can get away with just app-id="wezterm" if you want.
-    match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width {}
-}
 
 window-rule {
     match app-id=r#"^(code|Code|VSCodium|zen|google-chrome|chromium|firefox|discord|steam)$"#
@@ -424,7 +415,7 @@ binds {
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
-    Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" ".config/scripts/clipboard-manager.sh";}
+    Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" "clipse";}
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
     Mod+K hotkey-overlay-title="Process Killer" { spawn "kitty" "--class" "kill" ".config/scripts/process-killer.sh";}
 	Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock"; }

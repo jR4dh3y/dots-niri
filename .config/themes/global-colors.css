@@ -1,1 +1,29 @@
-../themes/dark/colors-waybar.css
+
+@define-color bg_color #1e1e20;
+@define-color fg_color #c59edc;
+@define-color tray_color #2a2a2c; 
+@define-color accent_color #dcd9e7;
+@define-color highlight_color #c3fb5b;
+@define-color invert_color #2a2a2c;
+@define-color caution_color #ffb86c;
+@define-color urgent_color #ff6e79;
+@define-color middle_color #c59edc;
+@define-color first_right_color #c3fb5b;
+@define-color middle_right_color #ff6e79;
+@define-color last_right_color #c59edc;
+@define-color funny_pastel_color #c3fb5b;
+
+/* Original Colors
+@define-color bg_color #1A1B26;
+@define-color fg_color #C0CAF5;
+@define-color tray_color #414868; 
+@define-color accent_color #9ECE6A;
+@define-color highlight_color #7AA2F7;
+@define-color invert_color #1A1B26;
+@define-color caution_color #E0AF68;
+@define-color urgent_color #F7768E;
+@define-color middle_color #9ECE6A;
+@define-color first_right_color #7DCFFF;
+@define-color middle_right_color #F7768E;
+@define-color last_right_color #BB9AF7;
+@define-color funny_pastel_color #FFB7B2; */
