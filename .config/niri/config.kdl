@@ -256,7 +256,7 @@ layout {
 spawn-at-startup "dunst"
 spawn-at-startup "waybar"
 spawn-at-startup "swww-daemon"
-spawn-at-startup "kitty" "clipse -listen"
+spawn-at-startup "clipse" "-listen"
 
 
 

@@ -173,11 +173,11 @@
       "format": "{icon}",
       "tooltip": false,
       "format-icons": {
-          "default": "󰓅 ",
-          "performance": "󰓅 ",
-          "balanced": " ",
-          "power-saver": "󰌪 "
-      }
+          "default": "󰓅",
+          "performance": "󰓅",
+          "balanced": "󰾅",
+          "power-saver": "󰾆"
+         }
    },
 
    "custom/notifications": {
