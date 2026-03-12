@@ -6,7 +6,7 @@ If you only need the wallpaper assets, see `assets/wal/`.
 
 ### Preview
 
-![preview](assets/Screenshot%20from%202025-08-12%2021-24-06.png)
+![preview](assets/ss1.png)
 
 ## What the installer does
 
