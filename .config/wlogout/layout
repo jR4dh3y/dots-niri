@@ -12,7 +12,7 @@
 }
 {
     "label" : "logout",
-    "action" : "loginctl kill-session $XDG_SESSION_ID",
+    "action" : "sh -lc 'niri msg action quit || loginctl terminate-user \"$USER\"'",
     "text" : "Logout",
     "keybind" : "x"
 }

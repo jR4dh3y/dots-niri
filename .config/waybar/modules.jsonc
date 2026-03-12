@@ -11,24 +11,35 @@
    },
 
    "clock": {
-      "format": "{:%Y-%m-%d %H:%M}"  
-   },   
-
-   "battery": {
-      "full-at": 96,
-      "states": {
-         "good": 78,
-         "ok": 77,
-         "warning": 20,
-         "critical": 10
-      },
-      "format": "{icon} {capacity}%",
-      "format-charging": " {capacity}%",
-      "format-plugged": " {capacity}%",
-      "format-time": "{H}h {M}m",
-      "format-icons": [ "󰁺","󰁻", "󰁼", "󰁽", "󰁾","󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+      "format": "{:%Y-%m-%d %H:%M}",
       "tooltip": true,
-      "tooltip-format": "Time: {time}\nPower: {power}W"
+      "calendar": {
+         "mode": "month",
+         "on-scroll": 1,
+         "format": {
+            "months": "<span color='#89b4fa'><b>{}</b></span>",
+            "weekdays": "<span color='#cdd6f4'><b>{}</b></span>",
+            "today": "{}"
+         }
+      },
+      "tooltip-format": "<tt><small>{calendar}</small></tt>"
+   },
+
+   "custom/weather": {
+      "exec": "$HOME/.config/scripts/waybar-weather.sh",
+      "return-type": "json",
+      "interval": 1800,
+      "signal": 8,
+      "format": "{}",
+      "on-click": "$HOME/.config/scripts/waybar-weather.sh open",
+      "on-click-right": "$HOME/.config/scripts/waybar-weather.sh set-location"
+   },
+
+   "custom/battery": {
+      "exec": "$HOME/.config/scripts/waybar-battery.sh",
+      "return-type": "json",
+      "interval": 15,
+      "format": "{}"
    },
 
    "network": {
@@ -85,6 +96,7 @@
         "drawer": {
             "icon-spacing": 4,
             "icon-size": 15,
+            "tooltip": false,
             "format": "󰒻",
             "click-to-reveal": true,
             "transition-duration": 400,
@@ -139,7 +151,7 @@
       "format-icons": {
          "default": ["󰃞","󰃟", "󰃠"]
       },
-      "tooltip": true
+      "tooltip": false
    },
 
    "cpu": {
@@ -197,9 +209,11 @@
    "custom/updates": {
       "exec": "$HOME/.config/scripts/waybar-updates.sh",
       "return-type": "json",
-      "exec-if": "[[ $(checkupdates-with-aur | wc -l) ]]",
-      "interval": "once",
-      "on-click": "foot --app-id=sysadmin --title=update paru -Syu && notify-send 'The system has been updated'"
+      "exec-if": "$HOME/.config/scripts/waybar-updates.sh has-updates",
+      "interval": 1800,
+      "format": "󰚰 {text}",
+      "tooltip-format": "Official: {percentage}\nAUR: {alt}\nTotal: {text}",
+      "on-click": "kitty --app-id=sysadmin --title=update paru -Syu && notify-send 'The system has been updated'"
    }
 }
 

@@ -83,7 +83,9 @@ window#waybar {
 }
 
 #battery,
+#custom-battery,
 #clock,
+#custom-weather,
 #custom-notifications,
 #custom-updates,
 #idle_inhibitor,
@@ -101,6 +103,10 @@ window#waybar {
    color: @middle_color;
 }
 
+#custom-weather {
+   color: @accent_color;
+}
+
 #custom-notifications,
 #custom-updates,
 #idle_inhibitor {
@@ -112,6 +118,7 @@ window#waybar {
 }
 
 #battery,
+#custom-battery,
 #power-profiles-daemon {
    color: @last_right_color;
 }
@@ -143,19 +150,32 @@ window#waybar {
    }
 }
 
-#battery.warning:not(.charging) {
+#battery.warning:not(.charging),
+#custom-battery.warning:not(.charging) {
    background-color: @caution_color;
    color: @invert_color;
 }
 
-#battery.critical:not(.charging) {
+#battery.critical:not(.charging),
+#custom-battery.critical:not(.charging) {
    background-color: @urgent_color;
    color: @invert_color;
 }
 
-#battery.critical:not(.charging) {
+#battery.critical:not(.charging),
+#custom-battery.critical:not(.charging) {
    animation-name: blink;
    animation-duration: 2s;
    animation-timing-function: ease-in-out;
    animation-iteration-count: infinite;
+}
+
+tooltip {
+   background: alpha(@bg_color, 0.96);
+   border: 1px solid @highlight_color;
+   border-radius: 8px;
+}
+
+tooltip label {
+   color: @fg_color;
 }

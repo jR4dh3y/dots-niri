@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Upgrade dotfiles - reruns symlink commands to update after changes
-# This script updates all symlinks and file copies without reinstalling packages
+# Upgrade dotfiles - reruns symlink commands to update after changes.
 
 set -euo pipefail
 IFS=$'\n\t'
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+INSTALL_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_DIR=$(cd -- "$INSTALL_DIR/.." && pwd)
 USER_NAME=${SUDO_USER:-${USER}}
 USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
@@ -21,7 +21,7 @@ cat <<'EOF'
 ------------------------------------------------------------------
  |                                                              |
  |                                                              |
- |	    -- jR4dh3y dotfiles upgrade/sync --                 |
+ |        -- jR4dh3y dotfiles upgrade/sync --                   |
  |                                                              |
  |                                                              |
 ------------------------------------------------------------------
@@ -39,54 +39,76 @@ check_sudo() {
 	fi
 }
 
+init_submodules() {
+	if [[ ! -d "$REPO_DIR/.git" ]]; then
+		warn "Skipping submodule init because $REPO_DIR is not a git checkout"
+		return
+	fi
+
+	msg "Initializing git submodules"
+	git -C "$REPO_DIR" submodule update --init --recursive
+}
+
 update_symlinks() {
 	msg "Updating symlinks for dotfiles in $USER_HOME"
-	mkdir -p "$USER_HOME/.config" "$USER_HOME/.local/share" "$USER_HOME/bin"
+	mkdir -p "$USER_HOME/.config" "$USER_HOME/.config/autostart" "$USER_HOME/.local/share" "$USER_HOME/bin"
 
-	# Update each subdir from repo .config into ~/.config
-	if [[ -d "$SCRIPT_DIR/.config" ]]; then
-		for d in "$SCRIPT_DIR/.config"/*; do
+	if [[ -d "$REPO_DIR/.config" ]]; then
+		for d in "$REPO_DIR/.config"/*; do
 			[[ -e "$d" ]] || continue
 			local name
 			name=$(basename "$d")
 			local target="$USER_HOME/.config/$name"
-			
-			# If symlink already points to the right place, skip
+
+			if [[ $name == "autostart" ]]; then
+				msg "Syncing autostart desktop entries"
+				rsync -a --info=NAME "$d/" "$target/"
+				continue
+			fi
+
 			if [[ -L "$target" && "$(readlink -f "$target")" == "$(readlink -f "$d")" ]]; then
 				msg "Already linked: $name"
 				continue
 			fi
-			
-			# Backup existing if it's not already the correct symlink
+
 			if [[ -L "$target" || -d "$target" || -f "$target" ]]; then
 				warn "Backing up existing $target to ${target}.bak"
 				mv -f "$target" "${target}.bak" || true
 			fi
-			
+
 			msg "Linking $name"
 			ln -s "$d" "$target"
 		done
 	fi
 
-	# Update each subdir/file from repo .local into ~/.local
-	if [[ -d "$SCRIPT_DIR/.local" ]]; then
+	if [[ -d "$REPO_DIR/.local" ]]; then
 		msg "Syncing .local files"
-		rsync -a --info=NAME --exclude="share/icons" --exclude="share/themes" \
-			"$SCRIPT_DIR/.local/" "$USER_HOME/.local/"
+		rsync -a --info=NAME --exclude="share/icons" --exclude="share/themes" "$REPO_DIR/.local/" "$USER_HOME/.local/"
 	fi
 
-	# Update wallpapers assets, if any
-	if [[ -d "$SCRIPT_DIR/assets/wal" ]]; then
+	if [[ -d "$REPO_DIR/assets/wal" ]]; then
 		msg "Syncing wallpapers"
 		mkdir -p "$USER_HOME/.local/share/wallpapers"
-		rsync -a --info=NAME "$SCRIPT_DIR/assets/wal/" "$USER_HOME/.local/share/wallpapers/"
+		rsync -a --info=NAME "$REPO_DIR/assets/wal/" "$USER_HOME/.local/share/wallpapers/"
 	fi
 
-	# Ensure correct ownership if run with sudo
 	if [[ -n "$SUDO_CMD" ]]; then
 		msg "Fixing ownership"
 		$SUDO_CMD chown -R "$USER_NAME":"$USER_NAME" "$USER_HOME/.config" "$USER_HOME/.local" "$USER_HOME/bin"
 	fi
+}
+
+install_ly_config() {
+	local src="$INSTALL_DIR/ly/config.ini"
+	local dest="/etc/ly/config.ini"
+
+	if [[ ! -f "$src" ]]; then
+		warn "Skipping ly config sync; file not found: $src"
+		return
+	fi
+
+	msg "Syncing ly config"
+	$SUDO_CMD install -Dm644 "$src" "$dest"
 }
 
 print_post_upgrade_notes() {
@@ -106,7 +128,9 @@ main() {
 	require_arch
 	check_sudo
 	print_banner
+	init_submodules
 	update_symlinks
+	install_ly_config
 	print_post_upgrade_notes
 }
 

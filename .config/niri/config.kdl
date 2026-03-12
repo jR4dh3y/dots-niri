@@ -67,7 +67,7 @@ input {
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
-/-output "eDP-1" {
+output "eDP-1" {
     // Uncomment this line to disable this output.
     // off
 
@@ -256,7 +256,10 @@ layout {
 spawn-at-startup "dunst"
 spawn-at-startup "waybar"
 spawn-at-startup "swww-daemon"
-spawn-at-startup "clipse" "-listen"
+// vicinae
+spawn-at-startup "vicinae" "server"
+
+// spawn-at-startup "clipse "listen"
 
 
 
@@ -403,10 +406,8 @@ window-rule {
     min-height 1036
     max-height 1036
 }
-
-// Steam chat windows - floating with specific size (matches friend names like "Vatsal", "John", etc.)
 window-rule {
-    match app-id="steam" title="^Vatsal$"
+    match app-id="steam" title="^$"
     open-floating true
     min-width 814
     max-width 814
@@ -414,8 +415,17 @@ window-rule {
     max-height 765
 }
 
+
+
+
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
+    
+    // Vocinae
+    Mod+A repeat=false { spawn "vicinae" "toggle"; }
+    Mod+V repeat=false { spawn "vicinae" "vicinae://extensions/vicinae/clipboard/history"; }
+    Mod+Period repeat=false { spawn "vicinae" "vicinae://extensions/vicinae/core/search-emojis"; }
+    Mod+C repeat=false { spawn "vicinae" "vicinae://extensions/ShyAssassin/vscode-recents/open-recents"; }
     // in the end. To find an XKB name for a particular key, you may use a program
     // like wev.
     //
@@ -431,17 +441,17 @@ binds {
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
-    Mod+A hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
+    //Mod+A hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
     // Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "hyprlock"; }
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "thunar"; }
-    Mod+C hotkey-overlay-title="Open a Code Editor" { spawn "code"; }
+    // Mod+C hotkey-overlay-title="Open a Code Editor" { spawn "code"; }
     // Mod+X hotkey-overlay-title="Power Menu" {spawn "kitty" "--class" "menu" ".config/scripts/power-menu.sh";}
     Mod+X hotkey-overlay-title="Open the Power Menu" { spawn ".config/scripts/wlogout.sh"; }
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
-    Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" "clipse";}
+    // Mod+V hotkey-overlay-title="Clipboard Manager" {spawn "kitty" "--class" "clipboard" "clipse";}
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
     Mod+K hotkey-overlay-title="Process Killer" { spawn "kitty" "--class" "kill" ".config/scripts/process-killer.sh";}
 	Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock"; }
@@ -526,7 +536,7 @@ binds {
 
     // You can bind mouse wheel scroll ticks using the following syntax.
     // These binds will change direction based on the natural-scroll setting.
-//
+
     // To avoid scrolling through workspaces really fast, you can use
     // the cooldown-ms property. The bind will be rate-limited to this value.
     // You can set a cooldown on any bind, but it's most useful for the wheel.
@@ -598,7 +608,7 @@ binds {
     // Consume one window from the right to the bottom of the focused column.
     Mod+Comma  { consume-window-into-column; }
     // Expel the bottom window from the focused column to the right.
-    Mod+Period { expel-window-from-column; }
+    // Mod+Period { expel-window-from-column; }
 
     Mod+R { switch-preset-column-width; }
     Mod+Shift+R { switch-preset-window-height; }

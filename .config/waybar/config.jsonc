@@ -17,7 +17,8 @@
       "group/right-group"
    ],
    "modules-center": [
-      "clock"
+      "clock",
+      "custom/weather"
    ],
    "modules-right": [
       "tray",
@@ -33,7 +34,7 @@
       "custom/separator",
       "power-profiles-daemon", // via tuned and tuned-ppd
       // "custom/bat",
-      "battery",
+      "custom/battery",
       "custom/padd"
    ]
 }

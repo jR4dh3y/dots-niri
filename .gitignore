@@ -1,7 +1,7 @@
 # Repository-level ignore: fish runtime/user-specific files
 # Ignore fish history and universal variables (user-specific)
 .config/fish/fish_history
-.config/fish/fish_variables
+.config/fish/fish_variables*
 .config/fish/functions/
 .config/fish/completions/
 .config/fish/conf.d/

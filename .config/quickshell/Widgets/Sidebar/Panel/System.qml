@@ -411,7 +411,7 @@ Rectangle {
 
     Process {
         id: logoutProcess
-        command: ["loginctl", "terminate-user", Quickshell.env("USER")]
+        command: ["sh", "-lc", "niri msg action quit || loginctl terminate-user \"$USER\""]
         running: false
     }
 

@@ -495,7 +495,7 @@ WlSessionLock {
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
-                        Qt.createQmlObject('import Quickshell.Io; Process { command: ["loginctl", "terminate-user", "' + Quickshell.env("USER") + '"]; running: true }', lock);
+                        Qt.createQmlObject('import Quickshell.Io; Process { command: ["sh", "-lc", "niri msg action quit || loginctl terminate-user \\"$USER\\""]; running: true }', lock);
                     }
                 }
 

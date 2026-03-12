@@ -1,4 +1,3 @@
-amdsmi
 app2unit-git
 archlinux-xdg-menu
 blueman
@@ -10,6 +9,8 @@ clinfo
 adobe-source-han-fonts
 apg 
 niri
+vicinae-bin
+gnome-keyring
 breezex-cursor-theme 
 ccze
 confz
@@ -37,15 +38,16 @@ hyprpolkitagent
 hyprsunset
 imv
 inxi
+iwd
 kitty
 linux-zen
+libayatana-appindicator
 lsd
 ly
 mangohud
 material-icon-theme-git
 mpd
 mpv
-network-manager-applet
 nwg-displays
 nwg-look
 obs-studio
@@ -61,7 +63,6 @@ qt5-imageformats
 qt5-quickcontrols
 qt5-quickcontrols2
 qt6ct
-radeontop
 rye
 sassc
 satty
@@ -109,12 +110,12 @@ less
 kvantum
 kvantum-theme-fluent-git
 neovim
-networkmanager
 ntfs-3g
 pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
+python-gobject
 python-materialyoucolor-git
 python-rich
 qt5-wayland

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=iwd-applet
+Comment=iwd tray applet
+Exec=sh -lc 'exec python3 "$HOME/.local/iwd-applet/iwd_applet.py"'
+Terminal=false
+X-GNOME-Autostart-enabled=true

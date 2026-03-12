@@ -7,6 +7,7 @@ alias neofetch "/usr/bin/fastfetch"
 alias vi "/usr/bin/nvim"
 alias emacs "/usr/bin/emacs -nw"
 alias mkcd "mkdir -p $argv[1]; and cd $argv[1]"
+alias pico "sshpass -p '0410' ssh pico@192.168.1.2"
 
 
 if test -f /usr/bin/lsd
