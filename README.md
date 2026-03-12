@@ -61,7 +61,7 @@ or:
 wget -qO- https://jr4.in/niri | bash
 ```
 
-You can also forward installer flags after `--`:
+You can also forward installer flags after the shell separator `--`:
 
 ```bash
 curl -fsSL https://jr4.in/niri | bash -s -- --sync-only

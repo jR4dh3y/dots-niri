@@ -40,6 +40,14 @@ ensure_cmd() {
 parse_args() {
 	while (($#)); do
 		case $1 in
+			--)
+				shift
+				while (($#)); do
+					INSTALL_ARGS+=("$1")
+					shift
+				done
+				break
+				;;
 			-h|--help)
 				usage
 				exit 0
