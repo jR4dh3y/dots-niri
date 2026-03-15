@@ -37,6 +37,26 @@ ensure_cmd() {
 	command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
 }
 
+install_prereqs() {
+	local missing=()
+	command -v git >/dev/null 2>&1 || missing+=(git)
+
+	if ((${#missing[@]} == 0)); then
+		return 0
+	fi
+
+	msg "Installing missing prerequisites: ${missing[*]}"
+	if [[ $EUID -eq 0 ]]; then
+		pacman -Sy --needed --noconfirm "${missing[@]}"
+	else
+		if command -v sudo >/dev/null 2>&1; then
+			sudo pacman -Sy --needed --noconfirm "${missing[@]}"
+		else
+			die "Missing ${missing[*]} is not available. Install them manually: pacman -S ${missing[*]}"
+		fi
+	fi
+}
+
 parse_args() {
 	while (($#)); do
 		case $1 in
@@ -109,6 +129,7 @@ run_installer() {
 
 main() {
 	parse_args "$@"
+	install_prereqs
 	clone_or_update_repo
 	run_installer
 }

@@ -19,6 +19,7 @@ run_as_invoking_user() {
 
 PACMAN=${PACMAN:-pacman}
 SUDO_CMD=""
+SUDO_KEEPALIVE_PID=""
 INTERACTIVE=1
 TUI_ENABLED=0
 TUI_CURSOR_HIDDEN=0
@@ -62,6 +63,10 @@ EOF
 }
 
 cleanup_terminal() {
+	if [[ -n ${SUDO_KEEPALIVE_PID:-} ]] && kill -0 "$SUDO_KEEPALIVE_PID" 2>/dev/null; then
+		kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+		wait "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+	fi
 	if [[ $TUI_CURSOR_HIDDEN -eq 1 ]]; then
 		tput cnorm >/dev/null 2>&1 || true
 		TUI_CURSOR_HIDDEN=0
@@ -72,7 +77,6 @@ cleanup_terminal() {
 enable_tui_if_possible() {
 	if [[ $INTERACTIVE -eq 1 && -t 0 && -t 1 ]] && command -v tput >/dev/null 2>&1; then
 		TUI_ENABLED=1
-		trap cleanup_terminal EXIT INT TERM
 	fi
 }
 
@@ -574,6 +578,18 @@ need_sudo() {
 	if [[ $EUID -ne 0 ]]; then
 		command -v sudo >/dev/null 2>&1 || die "sudo is required. Please install and re-run."
 		SUDO_CMD="sudo"
+
+		# Validate sudo credentials once, then keep the timestamp alive in
+		# the background so the user is never prompted again mid-install.
+		msg "Authenticating with sudo (you may be prompted for your password once)"
+		sudo -v || die "Failed to obtain sudo credentials."
+		(
+			while kill -0 $$ 2>/dev/null; do
+				sudo -n -v 2>/dev/null
+				sleep 50
+			done
+		) &
+		SUDO_KEEPALIVE_PID=$!
 	else
 		SUDO_CMD=""
 		if [[ -z ${SUDO_USER:-} ]]; then
@@ -654,9 +670,19 @@ install_paru() {
 	run_as_invoking_user makepkg -si --noconfirm
 	popd >/dev/null
 	rm -rf "$build_dir"
+
+	# Refresh the shell's command hash table so paru is found immediately
+	hash -r
+	if ! command -v paru >/dev/null 2>&1; then
+		# makepkg installs to /usr/bin; ensure it is on PATH
+		export PATH="/usr/bin:$PATH"
+		hash -r
+	fi
+	command -v paru >/dev/null 2>&1 || die "paru installation succeeded but command is still not found in PATH."
 }
 
 find_aur_helper() {
+	hash -r
 	if command -v paru >/dev/null 2>&1; then
 		echo "paru"
 	elif command -v yay >/dev/null 2>&1; then
@@ -778,8 +804,12 @@ install_all_packages() {
 	mapfile -t pkgs < <(gather_package_list)
 	if ((${#pkgs[@]})); then
 		msg "Installing ${#pkgs[@]} packages via $AURHELPER"
+		local aur_flags=(--needed --noconfirm)
+		if [[ $AURHELPER == "paru" ]]; then
+			aur_flags+=(--skipreview --nocleanmenu --nodiffmenu --noupgrademenu --sudoloop)
+		fi
 		# shellcheck disable=SC2086
-		run_as_invoking_user $AURHELPER -S --needed --noconfirm --skipreview ${pkgs[*]}
+		run_as_invoking_user $AURHELPER -S "${aur_flags[@]}" ${pkgs[*]}
 	else
 		warn "No packages found to install"
 	fi
@@ -929,6 +959,7 @@ EOF
 }
 
 main() {
+	trap cleanup_terminal EXIT INT TERM
 	parse_args "$@"
 	enable_tui_if_possible
 	require_arch

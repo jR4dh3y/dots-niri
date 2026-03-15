@@ -6,12 +6,12 @@ brightnessctl
 btop
 cheese
 clinfo
-adobe-source-han-fonts
-apg 
+adobe-source-han-sans-otc-fonts
+apg
 niri
 vicinae-bin
 gnome-keyring
-breezex-cursor-theme 
+breezex-cursor-theme
 ccze
 confz
 fish-fzf
@@ -92,8 +92,7 @@ xfce4-settings
 yarn
 zen-browser-bin
 adw-gtk-theme
-blueberry
-breezex-cursor-theme
+blueberry-wayland
 cliphist
 ddcutil
 dart-sass
@@ -105,10 +104,8 @@ gst-plugins-good
 gvfs
 hyprpicker
 imagemagick
-imd
 less
 kvantum
-kvantum-theme-fluent-git
 neovim
 ntfs-3g
 pipewire
@@ -125,7 +122,6 @@ thunar
 thunar-archive-plugin
 thunar-volman
 tumbler
-wallust
 wget
 wireplumber
 xarchiver

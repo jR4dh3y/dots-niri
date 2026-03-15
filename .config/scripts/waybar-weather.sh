@@ -113,9 +113,7 @@ print_weather() {
 	temperature=$(normalize_temperature "$temperature")
 	icon=$(weather_icon "$condition")
 
-	emit_json "$icon $temperature" "$tooltip
-
-Right-click to change location"
+	emit_json "$icon $temperature" "$tooltip"
 }
 
 case ${1:-print} in
