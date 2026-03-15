@@ -1,4 +1,4 @@
-app2unit-git
+app2unit
 archlinux-xdg-menu
 blueman
 bluez-utils
@@ -19,7 +19,7 @@ kvantum-theme-fluent-git
 makepkg-git-lfs-proto
 wallust
 whitesur-icon-theme
-xwayland-satellite-git
+xwayland-satellite
 cloudflare-warp-bin
 discord
 duf
@@ -77,7 +77,7 @@ ttf-dejavu-nerd
 ttf-hack-nerd
 ttf-iosevka-nerd
 ttf-jetbrains-mono-nerd
-ttf-material-symbols-variable-git
+ttf-material-symbols-variable
 ttf-mononoki-nerd
 ttf-nerd-fonts-symbols-mono
 ttf-ubuntu-mono-nerd
@@ -113,7 +113,7 @@ pipewire-alsa
 pipewire-jack
 pipewire-pulse
 python-gobject
-python-materialyoucolor-git
+python-materialyoucolor
 python-rich
 qt5-wayland
 qt5ct
