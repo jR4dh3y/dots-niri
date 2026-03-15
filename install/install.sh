@@ -851,17 +851,30 @@ is_repo_package() {
 	$PACMAN -Si "$pkg" >/dev/null 2>&1
 }
 
+is_already_satisfied() {
+	# Returns 0 if the package (or a provider of it) is already installed.
+	local pkg=$1
+	pacman -Qi "$pkg" >/dev/null 2>&1 && return 0
+	# Check if another installed package provides this one.
+	local provider
+	provider=$(pacman -Qq --provides "$pkg" 2>/dev/null | head -1)
+	[[ -n $provider ]]
+}
+
 split_package_lists() {
 	local -n _all_pkgs_ref=$1
 	local -n _repo_pkgs_ref=$2
 	local -n _aur_pkgs_ref=$3
+	local -n _skip_pkgs_ref=$4
 	local pkg
 
 	for pkg in "${_all_pkgs_ref[@]}"; do
 		if is_repo_package "$pkg"; then
 			_repo_pkgs_ref+=("$pkg")
+		elif is_already_satisfied "$pkg"; then
+			_skip_pkgs_ref+=("$pkg")
 		else
-			_aur_pkgs_ref+=("aur/$pkg")
+			_aur_pkgs_ref+=("$pkg")
 		fi
 	done
 }
@@ -870,13 +883,19 @@ install_all_packages() {
 	local pkgs=()
 	local repo_pkgs=()
 	local aur_pkgs=()
+	local skip_pkgs=()
 	mapfile -t pkgs < <(gather_package_list)
 	if ((${#pkgs[@]} == 0)); then
 		warn "No packages found to install"
 		return
 	fi
 
-	split_package_lists pkgs repo_pkgs aur_pkgs
+	msg "Classifying ${#pkgs[@]} packages (repo vs AUR)..."
+	split_package_lists pkgs repo_pkgs aur_pkgs skip_pkgs
+
+	if ((${#skip_pkgs[@]})); then
+		msg "Skipping ${#skip_pkgs[@]} packages already satisfied: ${skip_pkgs[*]}"
+	fi
 
 	if ((${#repo_pkgs[@]})); then
 		msg "Installing ${#repo_pkgs[@]} repo packages via pacman"
@@ -885,7 +904,7 @@ install_all_packages() {
 
 	if ((${#aur_pkgs[@]})); then
 		msg "Installing ${#aur_pkgs[@]} AUR packages via $AURHELPER"
-		local aur_flags=(--needed --noconfirm)
+		local aur_flags=(--needed --noconfirm --noprovides --useask)
 		if [[ $AURHELPER == "paru" ]]; then
 			aur_flags+=(--skipreview --noupgrademenu --sudoloop)
 		fi

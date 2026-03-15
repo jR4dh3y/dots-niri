@@ -1,5 +1,4 @@
 mesa
 vulkan-radeon
-libva-mesa-driver
 amdsmi
 radeontop
