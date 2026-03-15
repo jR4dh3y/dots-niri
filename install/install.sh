@@ -606,18 +606,29 @@ need_sudo() {
 
 		export SUDO_ASKPASS="$askpass_helper"
 
+		# Create a sudo wrapper that always passes -A so child processes
+		# (like makepkg -si calling sudo pacman -U) never prompt.
+		local sudo_wrapper_dir
+		sudo_wrapper_dir=$(mktemp -d "${TMPDIR:-/tmp}/dots-niri-sudo.XXXXXXXXXX")
+		cat > "$sudo_wrapper_dir/sudo" <<WRAPPER
+#!/bin/sh
+exec /usr/bin/sudo -A "\$@"
+WRAPPER
+		chmod 755 "$sudo_wrapper_dir/sudo"
+		export PATH="$sudo_wrapper_dir:$PATH"
+
 		# Keep the sudo timestamp alive in the background as a fallback.
 		(
 			while kill -0 $$ 2>/dev/null; do
-				sudo -n -v 2>/dev/null
+				/usr/bin/sudo -n -v 2>/dev/null
 				sleep 50
 			done
 		) &
 		SUDO_KEEPALIVE_PID=$!
 
-		# Clean up the password files on exit.
+		# Clean up the password files and wrapper on exit.
 		# shellcheck disable=SC2064
-		trap "rm -f '$askpass_helper' '$pw_file'; cleanup_terminal" EXIT INT TERM
+		trap "rm -rf '$askpass_helper' '$pw_file' '$sudo_wrapper_dir'; cleanup_terminal" EXIT INT TERM
 	else
 		SUDO_CMD=""
 		if [[ -z ${SUDO_USER:-} ]]; then
@@ -769,14 +780,14 @@ detect_gpu_vendors() {
 }
 
 append_package_file_if_present() {
-	local -n files_ref=$1
+	local -n _apfip_ref=$1
 	local file_path=$2
 	[[ -f $file_path ]] || return 0
-	files_ref+=("$file_path")
+	_apfip_ref+=("$file_path")
 }
 
 add_hardware_package_files() {
-	local -n files_ref=$1
+	local -n _ahpf_ref=$1
 	local cpu_vendor gpu_vendor
 	local gpu_vendors=()
 
@@ -784,11 +795,11 @@ add_hardware_package_files() {
 	case $cpu_vendor in
 		intel)
 			msg "Intel CPU detected, including intel microcode"
-			append_package_file_if_present files_ref "$INSTALL_DIR/pkg-cpu-intel.txt"
+			append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-cpu-intel.txt"
 			;;
 		amd)
 			msg "AMD CPU detected, including amd microcode"
-			append_package_file_if_present files_ref "$INSTALL_DIR/pkg-cpu-amd.txt"
+			append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-cpu-amd.txt"
 			;;
 		*)
 			warn "Could not detect CPU vendor for microcode selection"
@@ -805,15 +816,15 @@ add_hardware_package_files() {
 		case $gpu_vendor in
 			intel)
 				msg "Intel GPU detected, including Intel + Mesa graphics packages"
-				append_package_file_if_present files_ref "$INSTALL_DIR/pkg-gpu-intel.txt"
+				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-gpu-intel.txt"
 				;;
 			amd)
 				msg "AMD GPU detected, including AMD + Mesa graphics packages"
-				append_package_file_if_present files_ref "$INSTALL_DIR/pkg-gpu-amd.txt"
+				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-gpu-amd.txt"
 				;;
 			nvidia)
 				msg "NVIDIA GPU detected, including NVIDIA graphics packages"
-				append_package_file_if_present files_ref "$INSTALL_DIR/pkg-nvi.txt"
+				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-nvi.txt"
 				;;
 		esac
 		done
@@ -834,7 +845,7 @@ install_all_packages() {
 		msg "Installing ${#pkgs[@]} packages via $AURHELPER"
 		local aur_flags=(--needed --noconfirm)
 		if [[ $AURHELPER == "paru" ]]; then
-			aur_flags+=(--skipreview --nocleanmenu --nodiffmenu --noupgrademenu --sudoloop)
+			aur_flags+=(--skipreview --noupgrademenu --sudoloop)
 		fi
 		# shellcheck disable=SC2086
 		run_as_invoking_user $AURHELPER -S "${aur_flags[@]}" ${pkgs[*]}
