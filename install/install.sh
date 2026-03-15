@@ -11,7 +11,7 @@ USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
 run_as_invoking_user() {
 	if [[ -n ${SUDO_USER:-} && $EUID -eq 0 ]]; then
-		HOME="$USER_HOME" sudo -u "$SUDO_USER" --preserve-env=HOME,PATH USER="$SUDO_USER" "$@"
+		HOME="$USER_HOME" SUDO_ASKPASS="${SUDO_ASKPASS:-}" sudo -u "$SUDO_USER" --preserve-env=HOME,PATH,SUDO_ASKPASS USER="$SUDO_USER" "$@"
 	else
 		"$@"
 	fi
@@ -579,10 +579,34 @@ need_sudo() {
 		command -v sudo >/dev/null 2>&1 || die "sudo is required. Please install and re-run."
 		SUDO_CMD="sudo"
 
-		# Validate sudo credentials once, then keep the timestamp alive in
-		# the background so the user is never prompted again mid-install.
-		msg "Authenticating with sudo (you may be prompted for your password once)"
-		sudo -v || die "Failed to obtain sudo credentials."
+		# Ask for the password once up front. We pipe it to sudo -S -v to
+		# prime the credential cache, then a background loop keeps the
+		# timestamp alive so no further prompts appear during the install
+		# (including those from makepkg -si).
+		msg "Authenticating with sudo (you will be prompted for your password once)"
+		local user_pass
+		IFS= read -rsp "[sudo] password for $USER_NAME: " user_pass
+		printf '\n'
+
+		if ! printf '%s\n' "$user_pass" | sudo -S -v 2>/dev/null; then
+			die "Incorrect password or failed to obtain sudo credentials."
+		fi
+
+		# Create a temporary askpass script so that any child process that
+		# calls sudo (e.g. makepkg -si) can authenticate non-interactively.
+		local pw_file askpass_helper
+		pw_file=$(mktemp "${TMPDIR:-/tmp}/dots-niri-pw.XXXXXXXXXX")
+		printf '%s\n' "$user_pass" > "$pw_file"
+		chmod 600 "$pw_file"
+		unset user_pass
+
+		askpass_helper=$(mktemp "${TMPDIR:-/tmp}/dots-niri-askpass.XXXXXXXXXX")
+		printf '#!/bin/sh\ncat "%s"\n' "$pw_file" > "$askpass_helper"
+		chmod 700 "$askpass_helper"
+
+		export SUDO_ASKPASS="$askpass_helper"
+
+		# Keep the sudo timestamp alive in the background as a fallback.
 		(
 			while kill -0 $$ 2>/dev/null; do
 				sudo -n -v 2>/dev/null
@@ -590,6 +614,10 @@ need_sudo() {
 			done
 		) &
 		SUDO_KEEPALIVE_PID=$!
+
+		# Clean up the password files on exit.
+		# shellcheck disable=SC2064
+		trap "rm -f '$askpass_helper' '$pw_file'; cleanup_terminal" EXIT INT TERM
 	else
 		SUDO_CMD=""
 		if [[ -z ${SUDO_USER:-} ]]; then
@@ -688,7 +716,7 @@ find_aur_helper() {
 	elif command -v yay >/dev/null 2>&1; then
 		echo "yay"
 	else
-		install_paru
+		install_paru >&2
 		echo "paru"
 	fi
 }
