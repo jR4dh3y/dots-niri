@@ -139,6 +139,7 @@ tui_read_key() {
 			;;
 		'') printf 'enter' ;;
 		$' ') printf 'space' ;;
+		$'\x7f'|$'\b') printf 'backspace' ;;
 		$'\n'|$'\r') printf 'enter' ;;
 		[kK]) printf 'up' ;;
 		[jJ]) printf 'down' ;;
@@ -214,7 +215,7 @@ tui_toggle_checklist() {
 			fi
 		done
 
-		tui_draw_footer 'Use ↑/↓ (or j/k) to move, Space to toggle, Enter to continue, q to cancel.'
+		tui_draw_footer 'Use ↑/↓ (or j/k) to move, Space to toggle, Enter to continue, Backspace/b to go back, q to cancel.'
 		key=$(tui_read_key) || return 1
 		case $key in
 			up)
@@ -232,6 +233,9 @@ tui_toggle_checklist() {
 				;;
 			enter)
 				return 0
+				;;
+			backspace|[bB])
+				return 2
 				;;
 			quit|escape)
 				return 1
@@ -467,7 +471,10 @@ configure_install_plan_tui() {
 					"Toggle the steps you want to run." \
 					labels \
 					states; then
-					die "Installation cancelled by user."
+					case $? in
+						2) continue ;;
+						*) die "Installation cancelled by user." ;;
+					esac
 				fi
 				apply_plan_states states
 				;;
@@ -794,36 +801,36 @@ add_hardware_package_files() {
 	cpu_vendor=$(detect_cpu_vendor)
 	case $cpu_vendor in
 		intel)
-			msg "Intel CPU detected, including intel microcode"
+			msg "Intel CPU detected, including intel microcode" >&2
 			append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-cpu-intel.txt"
 			;;
 		amd)
-			msg "AMD CPU detected, including amd microcode"
+			msg "AMD CPU detected, including amd microcode" >&2
 			append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-cpu-amd.txt"
 			;;
 		*)
-			warn "Could not detect CPU vendor for microcode selection"
+			warn "Could not detect CPU vendor for microcode selection" >&2
 			;;
 	esac
 
 	mapfile -t gpu_vendors < <(detect_gpu_vendors || true)
 	if ((${#gpu_vendors[@]} == 0)); then
-		warn "Could not detect GPU vendor; using base graphics packages only"
+		warn "Could not detect GPU vendor; using base graphics packages only" >&2
 		return
 	fi
 
 	for gpu_vendor in "${gpu_vendors[@]}"; do
 		case $gpu_vendor in
 			intel)
-				msg "Intel GPU detected, including Intel + Mesa graphics packages"
+				msg "Intel GPU detected, including Intel + Mesa graphics packages" >&2
 				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-gpu-intel.txt"
 				;;
 			amd)
-				msg "AMD GPU detected, including AMD + Mesa graphics packages"
+				msg "AMD GPU detected, including AMD + Mesa graphics packages" >&2
 				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-gpu-amd.txt"
 				;;
 			nvidia)
-				msg "NVIDIA GPU detected, including NVIDIA graphics packages"
+				msg "NVIDIA GPU detected, including NVIDIA graphics packages" >&2
 				append_package_file_if_present _ahpf_ref "$INSTALL_DIR/pkg-nvi.txt"
 				;;
 		esac
@@ -839,18 +846,50 @@ gather_package_list() {
 	awk '{print $1}' "${files[@]}" | sed -e 's/#.*//' -e '/^\s*$/d' | sort -u
 }
 
+is_repo_package() {
+	local pkg=$1
+	$PACMAN -Si "$pkg" >/dev/null 2>&1
+}
+
+split_package_lists() {
+	local -n _all_pkgs_ref=$1
+	local -n _repo_pkgs_ref=$2
+	local -n _aur_pkgs_ref=$3
+	local pkg
+
+	for pkg in "${_all_pkgs_ref[@]}"; do
+		if is_repo_package "$pkg"; then
+			_repo_pkgs_ref+=("$pkg")
+		else
+			_aur_pkgs_ref+=("aur/$pkg")
+		fi
+	done
+}
+
 install_all_packages() {
+	local pkgs=()
+	local repo_pkgs=()
+	local aur_pkgs=()
 	mapfile -t pkgs < <(gather_package_list)
-	if ((${#pkgs[@]})); then
-		msg "Installing ${#pkgs[@]} packages via $AURHELPER"
+	if ((${#pkgs[@]} == 0)); then
+		warn "No packages found to install"
+		return
+	fi
+
+	split_package_lists pkgs repo_pkgs aur_pkgs
+
+	if ((${#repo_pkgs[@]})); then
+		msg "Installing ${#repo_pkgs[@]} repo packages via pacman"
+		$SUDO_CMD $PACMAN -S --needed --noconfirm "${repo_pkgs[@]}"
+	fi
+
+	if ((${#aur_pkgs[@]})); then
+		msg "Installing ${#aur_pkgs[@]} AUR packages via $AURHELPER"
 		local aur_flags=(--needed --noconfirm)
 		if [[ $AURHELPER == "paru" ]]; then
 			aur_flags+=(--skipreview --noupgrademenu --sudoloop)
 		fi
-		# shellcheck disable=SC2086
-		run_as_invoking_user $AURHELPER -S "${aur_flags[@]}" ${pkgs[*]}
-	else
-		warn "No packages found to install"
+		run_as_invoking_user "$AURHELPER" -S "${aur_flags[@]}" "${aur_pkgs[@]}"
 	fi
 }
 
@@ -1046,4 +1085,3 @@ main() {
 }
 
 main "$@"
-
