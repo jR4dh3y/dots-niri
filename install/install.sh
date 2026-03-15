@@ -1011,7 +1011,13 @@ enable_services() {
 		$SUDO_CMD systemctl disable --now NetworkManager || true
 	fi
 
-	for svc in ly power-profiles-daemon iwd; do
+	# ly uses a template unit (ly@.service) and needs a TTY instance.
+	if systemctl list-unit-files | grep -q '^ly@\.service'; then
+		msg "Enabling ly display manager on tty2"
+		$SUDO_CMD systemctl enable ly@tty2 || true
+	fi
+
+	for svc in power-profiles-daemon iwd; do
 		if systemctl list-unit-files | grep -q "^${svc}\.service"; then
 			$SUDO_CMD systemctl enable "$svc" || true
 		fi
