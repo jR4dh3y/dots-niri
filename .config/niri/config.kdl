@@ -80,7 +80,7 @@ output "eDP-1" {
     mode "1920x1080@144"
 
     // You can use integer or fractional scale, for example use 1.5 for 150% scale.
-    scale 1
+    scale 1.1
 
     // Transform allows to rotate the output counter-clockwise, valid values are:
     // normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
@@ -294,8 +294,14 @@ animations {
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules
 
 window-rule {
-    match app-id=r#"^(code|Code|VSCodium|zen|google-chrome|chromium|firefox|discord|steam)$"#
+    match app-id=r#"^(code|Code|VSCodium|zen|google-chrome|chromium|firefox|discord|steam|dev.zed.Zed)$"#
     default-column-width { proportion 1.0; }
+}
+
+window-rule {
+    match app-id="dev.radhey.VictusControl"
+    default-column-width { fixed 714; }
+    default-window-height { fixed 406; }
 }
 
 window-rule {
@@ -318,6 +324,7 @@ window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
 }
+
 
 // Example: block out two password managers from screen capture.
 // (This example rule is commented out with a "/-" in front.)
