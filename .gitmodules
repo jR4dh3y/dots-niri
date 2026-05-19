@@ -1,6 +1,0 @@
-[submodule ".local/wallpygui"]
-	path = .local/wallpygui
-	url = https://github.com/jR4dh3y/wallpygui
-[submodule ".local/iwd-applet"]
-	path = .local/iwd-applet
-	url = https://github.com/jR4dh3y/iwd-applet.git

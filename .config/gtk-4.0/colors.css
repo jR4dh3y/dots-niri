@@ -1,0 +1,22 @@
+/* Nonchalant-Purple GTK overrides */
+@define-color theme_bg_color #1e1e20;
+@define-color theme_fg_color #dcd9e7;
+@define-color theme_base_color #1e1e20;
+@define-color theme_text_color #dcd9e7;
+@define-color theme_selected_bg_color #c3fb5b;
+@define-color theme_selected_fg_color #1e1e20;
+@define-color theme_unfocused_bg_color #2a2a2c;
+@define-color theme_unfocused_fg_color #9c96ad;
+@define-color theme_unfocused_base_color #1e1e20;
+@define-color theme_unfocused_text_color #9c96ad;
+@define-color theme_unfocused_selected_bg_color #4a3b5f;
+@define-color theme_unfocused_selected_fg_color #e6dfef;
+@define-color borders #3a3a3d;
+@define-color warning_color #ffb86c;
+@define-color error_color #ff6e79;
+@define-color success_color #c3fb5b;
+@define-color link_color #c59edc;
+@define-color link_visited_color #e6dfef;
+@define-color content_view_bg #1e1e20;
+@define-color tooltip_background #2a2a2c;
+@define-color tooltip_text #dcd9e7;

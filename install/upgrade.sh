@@ -16,6 +16,14 @@ warn() { printf "\033[1;33m==>\033[0m %s\n" "$*"; }
 err() { printf "\033[1;31m==>\033[0m %s\n" "$*" 1>&2; }
 die() { err "$*"; exit 1; }
 
+run_as_invoking_user() {
+	if [[ -n ${SUDO_USER:-} && $EUID -eq 0 ]]; then
+		HOME="$USER_HOME" sudo -u "$SUDO_USER" --preserve-env=HOME,PATH USER="$SUDO_USER" "$@"
+	else
+		"$@"
+	fi
+}
+
 print_banner() {
 cat <<'EOF'
 ------------------------------------------------------------------
@@ -39,16 +47,6 @@ check_sudo() {
 	fi
 }
 
-init_submodules() {
-	if [[ ! -d "$REPO_DIR/.git" ]]; then
-		warn "Skipping submodule init because $REPO_DIR is not a git checkout"
-		return
-	fi
-
-	msg "Initializing git submodules"
-	git -C "$REPO_DIR" submodule update --init --recursive
-}
-
 update_symlinks() {
 	msg "Updating symlinks for dotfiles in $USER_HOME"
 	mkdir -p "$USER_HOME/.config" "$USER_HOME/.config/autostart" "$USER_HOME/.local/share" "$USER_HOME/bin"
@@ -59,12 +57,6 @@ update_symlinks() {
 			local name
 			name=$(basename "$d")
 			local target="$USER_HOME/.config/$name"
-
-			if [[ $name == "autostart" ]]; then
-				msg "Syncing autostart desktop entries"
-				rsync -a --info=NAME "$d/" "$target/"
-				continue
-			fi
 
 			if [[ -L "$target" && "$(readlink -f "$target")" == "$(readlink -f "$d")" ]]; then
 				msg "Already linked: $name"
@@ -98,6 +90,18 @@ update_symlinks() {
 	fi
 }
 
+apply_desktop_theme() {
+	local theme_script="$INSTALL_DIR/apply-theme.sh"
+
+	if [[ ! -x "$theme_script" ]]; then
+		warn "Skipping desktop theme apply; script not found or not executable: $theme_script"
+		return
+	fi
+
+	msg "Applying Nonchalant-Purple desktop theme"
+	run_as_invoking_user env THEME_REPO_DIR="$REPO_DIR" THEME_USER_HOME="$USER_HOME" bash "$theme_script" || warn "Theme apply did not complete; restart apps and apply manually if needed"
+}
+
 install_ly_config() {
 	local src="$INSTALL_DIR/ly/config.ini"
 	local dest="/etc/ly/config.ini"
@@ -108,6 +112,19 @@ install_ly_config() {
 	fi
 
 	msg "Syncing ly config"
+	$SUDO_CMD install -Dm644 "$src" "$dest"
+}
+
+install_nm_iwd_config() {
+	local src="$INSTALL_DIR/networkmanager/conf.d/wifi_backend.conf"
+	local dest="/etc/NetworkManager/conf.d/wifi_backend.conf"
+
+	if [[ ! -f "$src" ]]; then
+		warn "Skipping NetworkManager iwd config sync; file not found: $src"
+		return
+	fi
+
+	msg "Syncing NetworkManager iwd backend config"
 	$SUDO_CMD install -Dm644 "$src" "$dest"
 }
 
@@ -128,9 +145,10 @@ main() {
 	require_arch
 	check_sudo
 	print_banner
-	init_submodules
 	update_symlinks
+	apply_desktop_theme
 	install_ly_config
+	install_nm_iwd_config
 	print_post_upgrade_notes
 }
 

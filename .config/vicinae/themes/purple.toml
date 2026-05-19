@@ -1,0 +1,83 @@
+# Purple - pastel dark Vicinae theme
+# Purple-first palette with lime selection highlights.
+
+[meta]
+version = 1
+name = "Purple"
+description = "Pastel dark purple theme with mauve surfaces and lime selection."
+variant = "dark"
+inherits = "vicinae-dark"
+icon = "icons/ayu.png"
+
+[colors.core]
+background = "#150f1f"
+foreground = "#dcd9e7"
+secondary_background = "#241630"
+border = "#6f5790"
+accent = "#c59edc"
+accent_foreground = "#1e1e20"
+
+[colors.main_window]
+border = "#6f5790"
+footer = { background = "#241630" }
+
+[colors.settings_window]
+border = "#6f5790"
+
+[colors.accents]
+blue = "#c59edc"
+green = "#b8ff62"
+magenta = "#e6dfef"
+orange = "#ffb86c"
+purple = "#c59edc"
+red = "#ff6e79"
+yellow = "#ffb86c"
+cyan = "#e6dfef"
+
+[colors.shortcut]
+border = "#6f5790"
+
+[colors.text]
+default = "#dcd9e7"
+muted = "#9c96ad"
+danger = "#ff6e79"
+success = "#b8ff62"
+placeholder = "#9c96ad"
+selection = { background = "#c59edc", foreground = "#150f1f" }
+
+[colors.text.links]
+default = "#c59edc"
+visited = "#e6dfef"
+
+[colors.input]
+border = "#6f5790"
+border_focus = "#c59edc"
+border_error = "#ff6e79"
+
+[colors.button.primary]
+background = "#2f1d42"
+foreground = "#dcd9e7"
+hover = { background = "#51356f" }
+focus = { outline = "#c59edc" }
+
+[colors.list.item.hover]
+foreground = "#c3fb5b"
+secondary_foreground = "#c3fb5b"
+
+[colors.list.item.selection]
+background = "#4a3b5f"
+foreground = "#f0e8ff"
+secondary_background = "#6f5790"
+secondary_foreground = "#e6dfef"
+
+[colors.grid.item]
+background = "#241630"
+hover = { outline = "#c59edc" }
+selection = { outline = "#b8ff62" }
+
+[colors.scrollbars]
+background = "#6f5790"
+
+[colors.loading]
+bar = "#c59edc"
+spinner = "#e6dfef"

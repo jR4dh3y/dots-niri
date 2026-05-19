@@ -1,0 +1,83 @@
+# Nonchalant Purple - pastel dark Vicinae theme
+# Screenshot-inspired palette with neutral dark surfaces, mauve accents, and lime selection.
+
+[meta]
+version = 1
+name = "Nonchalant Purple"
+description = "Pastel dark theme with mauve accents and lime selection."
+variant = "dark"
+inherits = "vicinae-dark"
+icon = "icons/ayu.png"
+
+[colors.core]
+background = "#1e1e20"
+foreground = "#dcd9e7"
+secondary_background = "#2a2a2c"
+border = "#3a3a3d"
+accent = "#c59edc"
+accent_foreground = "#1e1e20"
+
+[colors.main_window]
+border = "#3a3a3d"
+footer = { background = "#2a2a2c" }
+
+[colors.settings_window]
+border = "#3a3a3d"
+
+[colors.accents]
+blue = "#c59edc"
+green = "#c3fb5b"
+magenta = "#e6dfef"
+orange = "#ffb86c"
+purple = "#c59edc"
+red = "#ff6e79"
+yellow = "#ffb86c"
+cyan = "#e6dfef"
+
+[colors.shortcut]
+border = "#3a3a3d"
+
+[colors.text]
+default = "#dcd9e7"
+muted = "#9c96ad"
+danger = "#ff6e79"
+success = "#c3fb5b"
+placeholder = "#9c96ad"
+selection = { background = "#c3fb5b", foreground = "#1e1e20" }
+
+[colors.text.links]
+default = "#c59edc"
+visited = "#e6dfef"
+
+[colors.input]
+border = "#3a3a3d"
+border_focus = "#c59edc"
+border_error = "#ff6e79"
+
+[colors.button.primary]
+background = "#2a2a2c"
+foreground = "#dcd9e7"
+hover = { background = "#4a3b5f" }
+focus = { outline = "#c59edc" }
+
+[colors.list.item.hover]
+foreground = "#c3fb5b"
+secondary_foreground = "#c3fb5b"
+
+[colors.list.item.selection]
+background = "#4a3b5f"
+foreground = "#e6dfef"
+secondary_background = "#5a4775"
+secondary_foreground = "#e6dfef"
+
+[colors.grid.item]
+background = "#2a2a2c"
+hover = { outline = "#c59edc" }
+selection = { outline = "#c3fb5b" }
+
+[colors.scrollbars]
+background = "#3a3a3d"
+
+[colors.loading]
+bar = "#c59edc"
+spinner = "#e6dfef"

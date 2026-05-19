@@ -1,0 +1,17 @@
+[General]
+Version=202
+ViewPropsTimestamp=2026,5,18,16,57,30.579
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=22
+
+[MainWindow]
+MenuBar=Disabled
+
+[MainWindow][Toolbar mainToolBar]
+ToolButtonStyle=IconOnly
+
+[UiSettings]
+ColorScheme=NonchalantPurple
+ColorSchemePath=NonchalantPurple.colors

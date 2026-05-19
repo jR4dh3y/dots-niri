@@ -14,7 +14,7 @@
 }
 
 window#waybar {
-   background: @bg_color;
+   background: alpha(@bg_color, 0.25);
    color: @fg_color;
 }
 
@@ -22,7 +22,7 @@ window#waybar {
    background: @bg_color;
    color: @fg_color;
    margin: 2px;
-   padding: 0px;
+   padding: 2px;
    border-radius: 4px;
 }
 
@@ -75,7 +75,7 @@ window#waybar {
    font-size: 20px;
 }
 #scratchpad {
-   background: @highlight_color;
+   background: alpha(@highlight_color, 0.7);
    color: @invert_color;
    margin: 0px 0px 2px 0px;
    padding: 0px 8px;
@@ -124,12 +124,12 @@ window#waybar {
 }
 
 #privacy {
-   background-color: @caution_color;
+   background-color: alpha(@caution_color, 0.7);
    color: @invert_color;
 }
 
 #tray {
-   background-color: @tray_color;
+   background-color: alpha(@tray_color, 0.5);
 }
 
 #power-profiles-daemon.performance {
@@ -171,7 +171,7 @@ window#waybar {
 }
 
 tooltip {
-   background: alpha(@bg_color, 0.96);
+   background: alpha(@bg_color, 0.75);
    border: 1px solid @highlight_color;
    border-radius: 8px;
 }

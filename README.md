@@ -16,7 +16,6 @@ If you only need the wallpaper assets, see `assets/wal/`.
 - Installs paru (AUR helper) if missing
 - Installs packages from `install/pkg.txt` plus auto-detected CPU/GPU vendor package lists using paru (deduplicated)
 - Symlinks repo `.config/` to `~/.config/` and syncs `.local/` into `~/.local/`
-- Initializes git submodules before syncing local apps like `wallpygui` and `iwd-applet`
 - Copies wallpapers from `assets/wal/` to `~/.local/share/wallpapers/`
 - Installs the tracked `ly` config into `/etc/ly/config.ini`
 - Enables available services: `ly`, `iwd`, `power-profiles-daemon`
@@ -28,7 +27,7 @@ If you only need the wallpaper assets, see `assets/wal/`.
 1) Clone the repo
 
 ```bash
-git clone --recurse-submodules https://github.com/jr4dh3y/dots-niri.git "$HOME/code/dots-niri"
+git clone https://github.com/jr4dh3y/dots-niri.git "$HOME/code/dots-niri"
 cd "$HOME/code/dots-niri"
 ```
 
@@ -78,7 +77,6 @@ The installer auto-detects:
 
 - Switch your shell to fish (optional): `chsh -s /usr/bin/fish`
 - Change wallpaper: `wallpaper ~/.local/share/wallpapers/<file>`
-- `iwd-applet` is started via `~/.config/autostart/iwd-applet.desktop`, avoiding duplicate launches with `niri`
 
 ## Troubleshooting
 
@@ -93,4 +91,3 @@ The installer auto-detects:
 ---
 
 Made for personal use; adapt as needed. PRs/issues welcome.
-

@@ -1,13 +1,5 @@
 {
    "niri/workspaces": {
-      "format": "{icon}",
-      "format-icons": {
-         "browser": "󰈹",
-         "chat": "",
-         "code": "",
-         "create": "",
-         "music": ""
-      }
    },
 
    "clock": {
@@ -216,4 +208,3 @@
       "on-click": "kitty --app-id=sysadmin --title=update paru -Syu && notify-send 'The system has been updated'"
    }
 }
-

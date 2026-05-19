@@ -1,0 +1,47 @@
+{
+   "$schema": "https://vicinae.com/schemas/config.json",
+   "font": {
+      "normal": {
+         "family": "CaskaydiaCove Nerd Font"
+      }
+   },
+   "theme": {
+      "dark": {
+         "name": "purple",
+         "icon_theme": "Breeze Light"
+      }
+   },
+   "launcher_window": {
+      "opacity": 0.7,
+      "client_side_decorations": {
+         "enabled": false
+      },
+      "blur": {
+         "enabled": true
+      }
+   },
+   "providers": {
+      "@ShyAssassin/store.vicinae.vscode-recents": {
+         "preferences": {
+            "vscodeFlavour": "Code",
+            "windowPreference": "Default"
+         }
+      },
+      "@dagimg-dot/store.vicinae.gnome-settings": {
+         "enabled": false
+      },
+      "core": {
+         "entrypoints": {
+            "prune-memory": {
+               "enabled": false
+            },
+            "report-bug": {
+               "enabled": false
+            },
+            "sponsor": {
+               "enabled": false
+            }
+         }
+      }
+   }
+}
