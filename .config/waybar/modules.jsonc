@@ -1,5 +1,13 @@
 {
    "niri/workspaces": {
+      "format": "{value}"
+   },
+
+   "cffi/niri-taskbar": {
+      "module_path": "/home/radhey/.config/waybar/libniri_taskbar-focused.so",
+      "notifications": {
+         "enabled": false
+      }
    },
 
    "clock": {

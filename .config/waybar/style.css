@@ -43,6 +43,19 @@ window#waybar {
    color: @invert_color;
 }
 
+.niri-taskbar button {
+   background: @bg_color;
+   margin: 2px;
+   padding: 1px 5px;
+   border-radius: 4px;
+   border: 0;
+   box-shadow: none;
+}
+
+.niri-taskbar button.focused {
+   background: @highlight_color;
+}
+
 #cpu {
    color: @funny_pastel_color;
    padding: 0px 4px;

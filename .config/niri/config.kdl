@@ -329,6 +329,7 @@ binds {
     Mod+C hotkey-overlay-title="Open VS Code Recents" { spawn "vicinae" "vicinae://launch/@ShyAssassin/store.vicinae.vscode-recents/open-recents"; }
     mod+shift+C hotkey-overlay-title="Open Zed Recents" { spawn "vicinae" "vicinae://launch/@pavle99/store.vicinae.zed-recents/open-recents"; }
  
+    Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }

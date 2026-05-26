@@ -13,6 +13,7 @@
    "modules-left": [
       "custom/padd",
       "niri/workspaces",
+      "cffi/niri-taskbar",
       "custom/separator",
       "group/right-group"
    ],
