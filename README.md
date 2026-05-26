@@ -16,7 +16,6 @@ If you only need the wallpaper assets, see `assets/wal/`.
 - Installs paru (AUR helper) if missing
 - Installs packages from `install/pkg.txt` plus auto-detected CPU/GPU vendor package lists using paru (deduplicated)
 - Symlinks repo `.config/` to `~/.config/` and syncs `.local/` into `~/.local/`
-- Builds the patched Waybar Niri taskbar module locally so the native `.so` matches the target machine
 - Copies wallpapers from `assets/wal/` to `~/.local/share/wallpapers/`
 - Installs the tracked `ly` config into `/etc/ly/config.ini`
 - Enables available services: `ly`, `iwd`, `power-profiles-daemon`

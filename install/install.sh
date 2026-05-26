@@ -982,18 +982,6 @@ apply_desktop_theme() {
 	run_as_invoking_user env THEME_REPO_DIR="$REPO_DIR" THEME_USER_HOME="$USER_HOME" bash "$theme_script" || warn "Theme apply did not complete; restart apps and apply manually if needed"
 }
 
-build_waybar_taskbar() {
-	local build_script="$INSTALL_DIR/build-waybar-taskbar.sh"
-
-	if [[ ! -x "$build_script" ]]; then
-		warn "Skipping Waybar Niri taskbar build; script not found or not executable: $build_script"
-		return
-	fi
-
-	msg "Building local Waybar Niri taskbar module"
-	run_as_invoking_user env WAYBAR_TASKBAR_USER_HOME="$USER_HOME" bash "$build_script" || warn "Waybar Niri taskbar build failed; Waybar may need the module rebuilt manually"
-}
-
 install_ly_config() {
 	local src="$INSTALL_DIR/ly/config.ini"
 	local dest="/etc/ly/config.ini"
@@ -1134,7 +1122,6 @@ main() {
 	fi
 	if [[ $RUN_DOTFILES -eq 1 ]]; then
 		link_dotfiles
-		build_waybar_taskbar
 		save_weather_location
 		apply_desktop_theme
 	fi

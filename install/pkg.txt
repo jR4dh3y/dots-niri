@@ -7,7 +7,7 @@ clinfo
 apg
 niri
 rsclip-bin
-rust
+waybar-niri-taskbar-focused-git
 gnome-keyring
 ccze
 fish-fzf

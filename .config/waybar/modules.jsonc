@@ -4,7 +4,7 @@
    },
 
    "cffi/niri-taskbar": {
-      "module_path": ".config/waybar/libniri_taskbar-focused.so",
+      "module_path": "/usr/lib/waybar/modules/libniri_taskbar-focused.so",
       "notifications": {
          "enabled": false
       }
