@@ -44,7 +44,7 @@ RUN_NM_IWD_CONFIG=1
 RUN_SERVICES=1
 RUN_SET_WALLPAPER=1
 WEATHER_LOCATION=""
-WEATHER_DEFAULT_LOCATION="180004"
+WEATHER_DEFAULT_LOCATION="London"
 
 msg() { printf "\033[1;32m==>\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m==>\033[0m %s\n" "$*"; }

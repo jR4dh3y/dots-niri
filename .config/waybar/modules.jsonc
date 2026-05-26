@@ -35,6 +35,16 @@
       "on-click-right": "$HOME/.config/scripts/waybar-weather.sh set-location"
    },
 
+   "custom/center-info": {
+      "exec": "$HOME/.config/scripts/waybar-center-info.sh",
+      "return-type": "json",
+      "interval": 60,
+      "format": "{}",
+      "tooltip": true,
+      "on-click": "$HOME/.config/scripts/waybar-center-info.sh open-weather",
+      "on-click-right": "$HOME/.config/scripts/waybar-center-info.sh set-location"
+   },
+
    "custom/battery": {
       "exec": "$HOME/.config/scripts/waybar-battery.sh",
       "return-type": "json",

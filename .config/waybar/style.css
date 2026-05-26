@@ -18,42 +18,40 @@ window#waybar {
    color: @fg_color;
 }
 
-#workspaces button {
-   background: @bg_color;
+.niri-taskbar {
+   background: transparent;
+   margin: 2px 1px;
+   padding: 0;
+   border-radius: 0;
+}
+
+.niri-taskbar .workspace-label {
+   background: alpha(@tray_color, 0.5);
    color: @fg_color;
-   margin: 2px;
-   padding: 2px;
-   border-radius: 4px;
+   border-radius: 0;
+   margin: 0;
+   padding: 3px 5px;
+   border: 0;
+   box-shadow: none;
+   text-shadow: none;
 }
 
-#workspaces button:hover {
-   background: @highlight_color;
-   color: @invert_color;
-   box-shadow: inherit;
-   text-shadow: inherit;
-}
-
-#workspaces button.focused {
-   background: @highlight_color;
-   color: @invert_color;
-}
-
-#workspaces button.urgent {
-   background: @urgent_color;
+.niri-taskbar .workspace-label.focused {
+   background: alpha(@highlight_color, 0.82);
    color: @invert_color;
 }
 
 .niri-taskbar button {
-   background: @bg_color;
-   margin: 2px;
-   padding: 1px 5px;
-   border-radius: 4px;
+   background: alpha(@tray_color, 0.5);
+   margin: 0;
+   padding: 3px 5px;
+   border-radius: 0px;
    border: 0;
    box-shadow: none;
 }
 
 .niri-taskbar button.focused {
-   background: @highlight_color;
+   background: alpha(@highlight_color, 0.38);
 }
 
 #cpu {
@@ -98,6 +96,7 @@ window#waybar {
 #battery,
 #custom-battery,
 #clock,
+#custom-center-info,
 #custom-weather,
 #custom-notifications,
 #custom-updates,
@@ -114,6 +113,11 @@ window#waybar {
 
 #clock {
    color: @middle_color;
+}
+
+#custom-center-info {
+   color: @middle_color;
+   background: transparent;
 }
 
 #custom-weather {
@@ -191,4 +195,5 @@ tooltip {
 
 tooltip label {
    color: @fg_color;
+   padding: 8px 10px;
 }
