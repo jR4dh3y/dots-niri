@@ -1,0 +1,14 @@
+@import 'colors.css';
+
+*:selected,
+selection {
+  background-color: @theme_selected_bg_color;
+  color: @theme_selected_fg_color;
+}
+
+/* Keep text/icons opaque; only ask GTK windows to draw translucent surfaces. */
+window,
+window.background,
+.background {
+  background-color: rgba(20, 22, 24, 0.86);
+}

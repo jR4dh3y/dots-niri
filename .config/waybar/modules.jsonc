@@ -1,12 +1,12 @@
 {
    "niri/workspaces": {
-      "format": "{icon}",
-      "format-icons": {
-         "browser": "󰈹",
-         "chat": "",
-         "code": "",
-         "create": "",
-         "music": ""
+      "format": "{value}"
+   },
+
+   "cffi/niri-taskbar": {
+      "module_path": "/home/radhey/.config/waybar/libniri_taskbar-focused.so",
+      "notifications": {
+         "enabled": false
       }
    },
 
@@ -33,6 +33,16 @@
       "format": "{}",
       "on-click": "$HOME/.config/scripts/waybar-weather.sh open",
       "on-click-right": "$HOME/.config/scripts/waybar-weather.sh set-location"
+   },
+
+   "custom/center-info": {
+      "exec": "$HOME/.config/scripts/waybar-center-info.sh",
+      "return-type": "json",
+      "interval": 60,
+      "format": "{}",
+      "tooltip": true,
+      "on-click": "$HOME/.config/scripts/waybar-center-info.sh open-weather",
+      "on-click-right": "$HOME/.config/scripts/waybar-center-info.sh set-location"
    },
 
    "custom/battery": {
@@ -216,4 +226,3 @@
       "on-click": "kitty --app-id=sysadmin --title=update paru -Syu && notify-send 'The system has been updated'"
    }
 }
-

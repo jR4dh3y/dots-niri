@@ -7,7 +7,7 @@ CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
 STATE_HOME=${XDG_STATE_HOME:-"$HOME/.local/state"}
 WEATHER_DIR="$STATE_HOME/waybar"
 LOCATION_FILE="$WEATHER_DIR/weather-location"
-DEFAULT_LOCATION="180004"
+DEFAULT_LOCATION="London"
 SIGNAL_NUM=8
 
 ensure_state_dir() {

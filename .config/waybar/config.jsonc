@@ -6,19 +6,18 @@
    "mode": "dock",
    "height": 25,
    "margin": 4,
-   "spacing": 5,
+   "spacing": 4,
    "include": [
       "$HOME/.config/waybar/modules.jsonc"
    ],
    "modules-left": [
       "custom/padd",
-      "niri/workspaces",
+      "cffi/niri-taskbar",
       "custom/separator",
       "group/right-group"
    ],
    "modules-center": [
-      "clock",
-      "custom/weather"
+      "custom/center-info"
    ],
    "modules-right": [
       "tray",

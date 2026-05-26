@@ -40,10 +40,11 @@ RUN_CHAOTIC_AUR=1
 RUN_PACKAGES=1
 RUN_DOTFILES=1
 RUN_LY_CONFIG=1
+RUN_NM_IWD_CONFIG=1
 RUN_SERVICES=1
 RUN_SET_WALLPAPER=1
 WEATHER_LOCATION=""
-WEATHER_DEFAULT_LOCATION="180004"
+WEATHER_DEFAULT_LOCATION="London"
 
 msg() { printf "\033[1;32m==>\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m==>\033[0m %s\n" "$*"; }
@@ -390,6 +391,7 @@ Install plan
   - Packages: $(bool_word "$RUN_PACKAGES")
   - Dotfiles sync: $(bool_word "$RUN_DOTFILES")
   - ly config sync: $(bool_word "$RUN_LY_CONFIG")
+  - NetworkManager iwd config sync: $(bool_word "$RUN_NM_IWD_CONFIG")
   - Service enablement: $(bool_word "$RUN_SERVICES")
   - Apply default wallpaper: $(bool_word "$RUN_SET_WALLPAPER")
 
@@ -404,6 +406,7 @@ set_sync_only_plan() {
 	RUN_PACKAGES=0
 	RUN_DOTFILES=1
 	RUN_LY_CONFIG=1
+	RUN_NM_IWD_CONFIG=1
 	RUN_SERVICES=0
 	RUN_SET_WALLPAPER=0
 }
@@ -416,6 +419,7 @@ set_packages_only_plan() {
 	RUN_PACKAGES=1
 	RUN_DOTFILES=0
 	RUN_LY_CONFIG=1
+	RUN_NM_IWD_CONFIG=1
 	RUN_SERVICES=1
 	RUN_SET_WALLPAPER=0
 }
@@ -429,13 +433,14 @@ apply_plan_states() {
 	RUN_PACKAGES=${states_ref[4]}
 	RUN_DOTFILES=${states_ref[5]}
 	RUN_LY_CONFIG=${states_ref[6]}
-	RUN_SERVICES=${states_ref[7]}
-	RUN_SET_WALLPAPER=${states_ref[8]}
+	RUN_NM_IWD_CONFIG=${states_ref[7]}
+	RUN_SERVICES=${states_ref[8]}
+	RUN_SET_WALLPAPER=${states_ref[9]}
 }
 
 configure_install_plan_tui() {
 	local options=(
-		"Full install      packages + dotfiles + ly + services"
+		"Full install      packages + dotfiles + ly + nm + services"
 		"Custom install    choose every install step"
 	)
 	local labels=(
@@ -446,10 +451,11 @@ configure_install_plan_tui() {
 		"Install packages from install/pkg*.txt"
 		"Sync repo dotfiles into the home directory"
 		"Install the tracked ly config into /etc/ly/config.ini"
+		"Install NetworkManager iwd backend config into /etc/NetworkManager/conf.d"
 		"Enable required services (ly, iwd, power-profiles-daemon)"
 		"Apply the default wallpaper after sync"
 	)
-	local states=(1 1 1 1 1 1 1 1 1)
+	local states=(1 1 1 1 1 1 1 1 1 1)
 	local done=0
 	local confirm_result
 
@@ -465,7 +471,7 @@ configure_install_plan_tui() {
 		case $REPLY in
 			0) ;;
 			1)
-				states=(1 1 1 1 1 1 1 1 0)
+				states=(1 1 1 1 1 1 1 1 1 0)
 				if ! tui_toggle_checklist \
 					"Custom install" \
 					"Toggle the steps you want to run." \
@@ -502,10 +508,10 @@ configure_install_plan_prompt() {
 
 	clear
 	print_banner
-	cat <<'EOF'
+cat <<'EOF'
 Select an install mode:
-  1) Full install      (packages + dotfiles + ly + services)
-  2) Custom            (choose each step)
+	1) Full install      (packages + dotfiles + ly + nm + services)
+	2) Custom            (choose each step)
 EOF
 
 	while true; do
@@ -521,6 +527,7 @@ EOF
 				RUN_PACKAGES=0; prompt_yes_no "Install packages from install/pkg*.txt?" Y && RUN_PACKAGES=1
 				RUN_DOTFILES=0; prompt_yes_no "Sync repo dotfiles into the home directory?" Y && RUN_DOTFILES=1
 				RUN_LY_CONFIG=0; prompt_yes_no "Install the tracked ly config into /etc/ly/config.ini?" Y && RUN_LY_CONFIG=1
+				RUN_NM_IWD_CONFIG=0; prompt_yes_no "Install NetworkManager iwd backend config into /etc/NetworkManager/conf.d?" Y && RUN_NM_IWD_CONFIG=1
 				RUN_SERVICES=0; prompt_yes_no "Enable required services (ly, iwd, power-profiles-daemon)?" Y && RUN_SERVICES=1
 				RUN_SET_WALLPAPER=0; prompt_yes_no "Apply the default wallpaper after sync?" N && RUN_SET_WALLPAPER=1
 				break
@@ -565,8 +572,8 @@ Usage: install.sh [options]
 
 Options:
   -y, --yes, --non-interactive  Run the full install without prompts
-      --sync-only               Sync dotfiles and ly config only
-      --packages-only           Install packages and enable services only
+	    --sync-only               Sync dotfiles, ly config, and NM iwd config only
+	    --packages-only           Install packages and enable services only
   -h, --help                    Show this help message
 EOF
 				exit 0
@@ -912,16 +919,6 @@ install_all_packages() {
 	fi
 }
 
-init_submodules() {
-	if [[ ! -d "$REPO_DIR/.git" ]]; then
-		warn "Skipping submodule init because $REPO_DIR is not a git checkout"
-		return
-	fi
-
-	msg "Initializing git submodules"
-	run_as_invoking_user git -C "$REPO_DIR" submodule update --init --recursive
-}
-
 link_dotfiles() {
 	msg "Linking dotfiles into $USER_HOME"
 	mkdir -p "$USER_HOME/.config" "$USER_HOME/.config/autostart" "$USER_HOME/.local/share" "$USER_HOME/bin"
@@ -932,12 +929,6 @@ link_dotfiles() {
 			local name
 			name=$(basename "$d")
 			local target="$USER_HOME/.config/$name"
-
-			if [[ $name == "autostart" ]]; then
-				msg "Syncing autostart desktop entries"
-				rsync -a --info=NAME "$d/" "$target/"
-				continue
-			fi
 
 			if [[ -L "$target" || -d "$target" || -f "$target" ]]; then
 				if [[ -L "$target" && "$(readlink -f "$target")" == "$(readlink -f "$d")" ]]; then
@@ -979,6 +970,18 @@ save_weather_location() {
 	fi
 }
 
+apply_desktop_theme() {
+	local theme_script="$INSTALL_DIR/apply-theme.sh"
+
+	if [[ ! -x "$theme_script" ]]; then
+		warn "Skipping desktop theme apply; script not found or not executable: $theme_script"
+		return
+	fi
+
+	msg "Applying Nonchalant-Purple desktop theme"
+	run_as_invoking_user env THEME_REPO_DIR="$REPO_DIR" THEME_USER_HOME="$USER_HOME" bash "$theme_script" || warn "Theme apply did not complete; restart apps and apply manually if needed"
+}
+
 install_ly_config() {
 	local src="$INSTALL_DIR/ly/config.ini"
 	local dest="/etc/ly/config.ini"
@@ -1004,24 +1007,52 @@ install_ly_config() {
 	$SUDO_CMD install -Dm644 "$src" "$dest"
 }
 
-enable_services() {
-	msg "Enabling relevant system services when available"
-	if systemctl list-unit-files | grep -q '^NetworkManager\.service'; then
-		warn "Disabling legacy NetworkManager service"
-		$SUDO_CMD systemctl disable --now NetworkManager || true
+install_nm_iwd_config() {
+	local src="$INSTALL_DIR/networkmanager/conf.d/wifi_backend.conf"
+	local dest="/etc/NetworkManager/conf.d/wifi_backend.conf"
+	local backup
+
+	if [[ ! -f "$src" ]]; then
+		warn "Skipping NetworkManager iwd config install; file not found: $src"
+		return
 	fi
 
+	if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+		msg "NetworkManager iwd backend config already matches tracked config"
+		return
+	fi
+
+	if [[ -f "$dest" ]]; then
+		backup="${dest}.bak.$(date +%Y%m%d%H%M%S)"
+		warn "Backing up existing NetworkManager iwd config to $backup"
+		$SUDO_CMD cp "$dest" "$backup"
+	fi
+
+	msg "Installing NetworkManager iwd backend config"
+	$SUDO_CMD install -Dm644 "$src" "$dest"
+}
+
+enable_services() {
 	# ly uses a template unit (ly@.service) and needs a TTY instance.
 	if systemctl list-unit-files | grep -q '^ly@\.service'; then
 		msg "Enabling ly display manager on tty2"
 		$SUDO_CMD systemctl enable ly@tty2 || true
 	fi
 
-	for svc in power-profiles-daemon iwd; do
-		if systemctl list-unit-files | grep -q "^${svc}\.service"; then
-			$SUDO_CMD systemctl enable "$svc" || true
-		fi
-	done
+	if systemctl list-unit-files | grep -q '^iwd\.service'; then
+		msg "Enabling iwd service"
+		$SUDO_CMD systemctl enable iwd.service || true
+	fi
+
+	if systemctl list-unit-files | grep -q '^wpa_supplicant\.service'; then
+		msg "Disabling wpa_supplicant service"
+		$SUDO_CMD systemctl disable wpa_supplicant.service || true
+	fi
+
+	if systemctl list-unit-files | grep -q '^wpa_supplicant@\.service'; then
+		msg "Disabling wpa_supplicant template service"
+		$SUDO_CMD systemctl disable wpa_supplicant@.service || true
+	fi
 }
 
 refresh_font_cache() {
@@ -1053,7 +1084,8 @@ print_post_install_notes() {
 Done. Next steps (optional):
 	- Reboot to switch to linux-zen kernel and ensure services start.
 	- Log in with the 'ly' display manager and choose your Wayland session (niri).
-	- Wireless is configured for 'iwd'; the tray applet auto-starts from niri.
+	- NetworkManager is configured to use iwd from /etc/NetworkManager/conf.d/wifi_backend.conf.
+	- If Wi-Fi does not switch immediately, restart NetworkManager or reboot once.
 	- Right-click the Waybar weather widget any time to change the saved location.
 	- Consider changing your shell to fish: chsh -s "/usr/bin/fish" "$USER_NAME"
 	- For wallust-based theming, pick a wallpaper and run: wallust run /path/to/wallpaper
@@ -1089,12 +1121,15 @@ main() {
 		install_all_packages
 	fi
 	if [[ $RUN_DOTFILES -eq 1 ]]; then
-		init_submodules
 		link_dotfiles
 		save_weather_location
+		apply_desktop_theme
 	fi
 	if [[ $RUN_LY_CONFIG -eq 1 ]]; then
 		install_ly_config
+	fi
+	if [[ $RUN_NM_IWD_CONFIG -eq 1 ]]; then
+		install_nm_iwd_config
 	fi
 	if [[ $RUN_SERVICES -eq 1 ]]; then
 		enable_services
