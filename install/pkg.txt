@@ -7,6 +7,7 @@ clinfo
 apg
 niri
 rsclip-bin
+rust
 gnome-keyring
 ccze
 fish-fzf

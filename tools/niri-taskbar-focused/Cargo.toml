@@ -1,0 +1,29 @@
+[package]
+name = "niri-taskbar"
+description = "Niri taskbar module for Waybar"
+version = "0.4.0+niri.26.4-focused"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/LawnGnome/niri-taskbar"
+rust-version = "1.87.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.100"
+async-channel = "2.5.0"
+async-stream = "0.3.6"
+bitflags = "2.10.0"
+freedesktop-icons = "0.4.0"
+futures = "0.3.31"
+itertools = "0.14.0"
+linicon = "2.3.0"
+niri-ipc = "26.4.0"
+regex = "1.12.2"
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.17"
+tracing = "0.1.43"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
+waybar-cffi = "0.1.1"
+zbus = "5.12.0"

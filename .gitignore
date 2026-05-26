@@ -18,3 +18,5 @@
 # If you want to ignore everything in the fish dir except tracked configs,
 # consider uncommenting the next line and adding explicit allow-lists.
 # .config/fish/
+.config/waybar/libniri_taskbar-focused.so
+tools/niri-taskbar-focused/target/
