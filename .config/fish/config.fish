@@ -24,6 +24,11 @@ if test -d ~/.local/bin
     end
 end
 
+# Add Go-installed CLIs to PATH
+if test -d ~/go/bin
+    fish_add_path --prepend ~/go/bin
+end
+
 # Add depot_tools to PATH
 if test -d ~/Applications/depot_tools
     if not contains -- ~/Applications/depot_tools $PATH

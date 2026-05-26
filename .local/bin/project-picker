@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${1:-choose}"
+case "$mode" in
+	code)
+		command_name="code"
+		prompt="Code > "
+		;;
+	zed)
+		command_name="zed"
+		prompt="Zed > "
+		;;
+	choose)
+		command_name=""
+		prompt="Project > "
+		;;
+	*)
+		printf 'Usage: project-picker [choose|code|zed]\n' >&2
+		exit 2
+		;;
+esac
+
+if ! command -v fuzzel >/dev/null 2>&1; then
+	notify-send "Project picker" "fuzzel is not installed" 2>/dev/null || true
+	exit 1
+fi
+
+if [[ -n "$command_name" ]] && ! command -v "$command_name" >/dev/null 2>&1; then
+	notify-send "Project picker" "$command_name is not installed" 2>/dev/null || true
+	exit 1
+fi
+
+roots=(
+	"$HOME/code"
+	"$HOME/random"
+)
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/project-picker"
+recent_file="$state_dir/recent"
+
+projects=$(
+	for root in "${roots[@]}"; do
+		[[ -d "$root" ]] || continue
+
+		find "$root" -mindepth 1 -maxdepth 1 -type d 2>/dev/null
+
+		if command -v fd >/dev/null 2>&1; then
+			fd -H -t d -d 4 '^\.git$' "$root" 2>/dev/null |
+				sed -E 's#/.git/?$##'
+		else
+			find "$root" -maxdepth 5 -type d -name .git 2>/dev/null |
+				sed -E 's#/.git/?$##'
+		fi
+	done | awk '!seen[$0]++'
+)
+
+ordered_projects=$(
+	{
+		if [[ -f "$recent_file" ]]; then
+			while IFS= read -r recent; do
+				[[ -d "$recent" ]] && printf '%s\n' "$recent"
+			done <"$recent_file"
+		fi
+		printf '%s\n' "$projects"
+	} | awk '!seen[$0]++'
+)
+
+selection=$(
+	printf '%s\n' "$ordered_projects" |
+		sed "s#^$HOME/#~/#" |
+		fuzzel --dmenu --prompt="$prompt" --placeholder="Search projects..." || true
+)
+
+[[ -n "$selection" ]] || exit 0
+selection="${selection/#\~/$HOME}"
+
+if [[ "$mode" == "choose" ]]; then
+	editor_selection=$(
+		{
+			command -v code >/dev/null 2>&1 && printf 'VS Code\n'
+			command -v zed >/dev/null 2>&1 && printf 'Zed\n'
+		} | fuzzel --dmenu --prompt="Open with > " --placeholder="Choose editor..." || true
+	)
+
+	case "$editor_selection" in
+		"VS Code") command_name="code" ;;
+		"Zed") command_name="zed" ;;
+		*) exit 0 ;;
+	esac
+fi
+
+mkdir -p "$state_dir"
+{
+	printf '%s\n' "$selection"
+	if [[ -f "$recent_file" ]]; then
+		grep -Fxv "$selection" "$recent_file" || true
+	fi
+} | awk 'NF' | head -100 >"$recent_file.tmp"
+mv "$recent_file.tmp" "$recent_file"
+
+exec "$command_name" "$selection"

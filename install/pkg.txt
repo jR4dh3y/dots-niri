@@ -6,7 +6,7 @@ btop
 clinfo
 apg
 niri
-vicinae-bin
+rsclip-bin
 gnome-keyring
 ccze
 fish-fzf
@@ -66,7 +66,9 @@ ddcutil
 dart-sass
 fd
 fuzzel
+zoxide
 gvfs
+gtk4-layer-shell
 imagemagick
 less
 kvantum
@@ -84,6 +86,9 @@ xarchiver
 xdg-desktop-portal-gnome
 hyprlock
 wl-clipboard
+wtype
+tesseract
+tesseract-data-eng
 lxappearance
 ttf-material-icons-git
 libgee

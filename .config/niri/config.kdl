@@ -104,8 +104,7 @@ spawn-at-startup "sh" "-c" "sleep 4 && pgrep -x warp-taskbar >/dev/null || exec 
 spawn-at-startup "sh" "-c" "sleep 6 && pgrep -x Discord >/dev/null || pgrep -x discord >/dev/null || exec discord --start-minimized"
 spawn-at-startup "awww-daemon"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-// vicinae
-spawn-at-startup "vicinae" "server"
+spawn-at-startup "systemctl" "--user" "start" "rsclipd.service"
 // KDE daemon -- required for Dolphin's "Open With" dialog, MIME associations,
 // and other KIO services. Without it, Dolphin can't discover installed apps.
 // Delay kded6 so waybar can claim the StatusNotifierWatcher D-Bus name first;
@@ -124,11 +123,11 @@ window-rule {
     default-column-width { proportion 1.0; }
 }
 
-window-rule {
-    match app-id="dev.radhey.VictusControl"
-    default-column-width { fixed 714; }
-    default-window-height { fixed 406; }
-}
+// window-rule {
+//     match app-id="dev.radhey.VictusControl"
+//     default-column-width { fixed 714; }
+//     default-window-height { fixed 406; }
+// }
 
 window-rule {
     match app-id="chrome-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
@@ -170,7 +169,7 @@ window-rule {
     popups {
         geometry-corner-radius 15
         background-effect {
-            blur true
+            blur false
         }
     }
 }
@@ -218,17 +217,6 @@ window-rule {
     geometry-corner-radius 0
     clip-to-geometry false
 }
-window-rule {
-    match app-id="clipboard"
-    open-floating true
-    min-width 900
-    min-height 600
-    max-width 900
-    max-height 600
-    geometry-corner-radius 0
-    clip-to-geometry false
-}
-
 window-rule {
     match app-id="port"
     open-floating true
@@ -322,18 +310,16 @@ window-rule {
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
 
-    // Vocinae
-    Mod+A hotkey-overlay-title="Toggle Vocinae" { spawn "vicinae" "toggle"; }
-    Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "vicinae" "vicinae://launch/clipboard/history"; }
-    Mod+Period hotkey-overlay-title="Search Emojis" { spawn "vicinae" "vicinae://launch/core/search-emojis"; }
-    Mod+C hotkey-overlay-title="Open VS Code Recents" { spawn "vicinae" "vicinae://launch/@ShyAssassin/store.vicinae.vscode-recents/open-recents"; }
-    mod+shift+C hotkey-overlay-title="Open Zed Recents" { spawn "vicinae" "vicinae://launch/@pavle99/store.vicinae.zed-recents/open-recents"; }
+    // Fuzzel launcher and rsclip clipboard, with lightweight project helpers.
+    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "/home/radhey/random/rsclip/target/release/rsclip" "show"; }
+    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    Mod+C hotkey-overlay-title="Open Project" { spawn "/home/radhey/.local/bin/project-picker"; }
+    Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "/home/radhey/.local/bin/project-picker" "zed"; }
  
-    Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
-    //Mod+A hotkey-overlay-title="Run an Application" { spawn "fuzzel"; }
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
@@ -343,6 +329,7 @@ binds {
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
     Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock"; }
+    Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
     Mod+Space { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
     
     XF86AudioRaiseVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
