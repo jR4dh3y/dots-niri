@@ -1,40 +1,32 @@
 [
-{
-   "id": "bar-0",
-   "name": "bar-niri",
-   "layer": "top",
-   "mode": "dock",
-   "height": 25,
-   "margin": 4,
-   "spacing": 4,
-   "include": [
-      "$HOME/.config/waybar/modules.jsonc"
-   ],
-   "modules-left": [
+  {
+    "id": "bar-0",
+    "name": "bar-niri",
+    "layer": "top",
+    "mode": "dock",
+    "height": 25,
+    "margin": 4,
+    "spacing": 4,
+    "include": ["$HOME/.config/waybar/modules.jsonc"],
+    "modules-left": [
       "custom/padd",
       "cffi/niri-taskbar",
       "custom/separator",
-      "group/right-group"
-   ],
-   "modules-center": [
-      "custom/center-info"
-   ],
-   "modules-right": [
-      "tray",
+      "group/right-group",
+    ],
+    "modules-center": ["custom/center-info"],
+    "modules-right": [
       "privacy",
       "custom/separator",
-      "custom/updates",
-      "idle_inhibitor",
-      "custom/notifications",
+      "tray",
       "custom/separator",
-      "backlight",
+      "group/status-group",
       "custom/separator",
-      "pulseaudio",
+      "group/audio-group",
       "custom/separator",
-      "power-profiles-daemon", // via tuned and tuned-ppd
       // "custom/bat",
       "custom/battery",
-      "custom/padd"
-   ]
-}
+      "custom/padd",
+    ],
+  },
 ]

@@ -97,8 +97,28 @@
       "icon-size": 15,
       "spacing": 8
    },
-   "custom/cogicon":{
-      "format": "󰒔 "
+
+   "group/status-group": {
+      "orientation": "inherit",
+      "modules": [
+         "custom/updates",
+         "idle_inhibitor",
+         "custom/notifications",
+         "power-profiles-daemon"
+      ]
+   },
+
+   "group/audio-group": {
+      "orientation": "inherit",
+      "modules": [
+         "backlight",
+         "pulseaudio"
+      ]
+   },
+
+   "custom/cogicon": {
+      "format": "󰒔",
+      "tooltip": false
    },
 
    "group/right-group": {
