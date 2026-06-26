@@ -31,7 +31,7 @@ window#waybar > box {
 .niri-taskbar {
     background: #2a2a2c;
     margin: 2px;
-    padding: 0px 5px;
+    padding: 0px;
     border-radius: 7px;
 }
 
@@ -62,6 +62,16 @@ window#waybar > box {
 
 .niri-taskbar button.focused {
     background: alpha(@highlight_color, 0.38);
+}
+
+.niri-taskbar .workspace-label:first-child,
+.niri-taskbar button:first-child {
+    border-radius: 7px 0 0 7px;
+}
+
+.niri-taskbar .workspace-label:last-child,
+.niri-taskbar button:last-child {
+    border-radius: 0 7px 7px 0;
 }
 
 #cpu {
