@@ -1,45 +1,83 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mode="${1:-choose}"
-case "$mode" in
-	code)
-		command_name="code"
-		prompt="Code > "
-		;;
-	zed)
-		command_name="zed"
-		prompt="Zed > "
-		;;
-	choose)
-		command_name=""
-		prompt="Project > "
-		;;
-	*)
-		printf 'Usage: project-picker [choose|code|zed]\n' >&2
-		exit 2
-		;;
-esac
-
-if ! command -v fuzzel >/dev/null 2>&1; then
-	notify-send "Project picker" "fuzzel is not installed" 2>/dev/null || true
-	exit 1
-fi
-
-if [[ -n "$command_name" ]] && ! command -v "$command_name" >/dev/null 2>&1; then
-	notify-send "Project picker" "$command_name is not installed" 2>/dev/null || true
-	exit 1
-fi
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/project-picker"
+recent_file="$state_dir/recent"
+editor_file="$state_dir/editor"
 
 roots=(
 	"$HOME/code"
 	"$HOME/random"
 )
 
-state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/project-picker"
-recent_file="$state_dir/recent"
+notify_error() {
+	notify-send "Project picker" "$1" 2>/dev/null || printf '%s\n' "$1" >&2
+}
 
-projects=$(
+editor_label() {
+	case "$1" in
+		code) printf 'VS Code' ;;
+		zed) printf 'Zed' ;;
+		*) printf '%s' "$1" ;;
+	esac
+}
+
+editor_command() {
+	case "$1" in
+		code) printf 'code' ;;
+		zed) printf 'zed' ;;
+		*) return 1 ;;
+	esac
+}
+
+available_editor_ids() {
+	command -v code >/dev/null 2>&1 && printf 'code\n'
+	command -v zed >/dev/null 2>&1 && printf 'zed\n'
+}
+
+default_editor() {
+	if [[ -f "$editor_file" ]]; then
+		local saved
+		saved=$(sed -n '1p' "$editor_file")
+		if editor_command "$saved" >/dev/null && command -v "$(editor_command "$saved")" >/dev/null 2>&1; then
+			printf '%s\n' "$saved"
+			return
+		fi
+	fi
+
+	available_editor_ids | sed -n '1p'
+}
+
+set_editor() {
+	mkdir -p "$state_dir"
+	printf '%s\n' "$1" > "$editor_file"
+}
+
+toggle_editor() {
+	local current next
+	current=$(default_editor)
+	case "$current" in
+		code)
+			if command -v zed >/dev/null 2>&1; then next=zed; else next=code; fi
+			;;
+		*)
+			if command -v code >/dev/null 2>&1; then next=code; else next=zed; fi
+			;;
+	esac
+	set_editor "$next"
+}
+
+print_header() {
+	local current
+	current=$(default_editor)
+	case "$current" in
+		code) printf '[vscode] ' ;;
+		zed) printf '[zedtor] ' ;;
+		*) printf '[editor] ' ;;
+	esac
+}
+
+list_projects() {
 	for root in "${roots[@]}"; do
 		[[ -d "$root" ]] || continue
 
@@ -53,50 +91,149 @@ projects=$(
 				sed -E 's#/.git/?$##'
 		fi
 	done | awk '!seen[$0]++'
-)
+}
 
-ordered_projects=$(
+ordered_projects() {
 	{
 		if [[ -f "$recent_file" ]]; then
 			while IFS= read -r recent; do
 				[[ -d "$recent" ]] && printf '%s\n' "$recent"
 			done <"$recent_file"
 		fi
-		printf '%s\n' "$projects"
+		list_projects
 	} | awk '!seen[$0]++'
-)
+}
 
-selection=$(
-	printf '%s\n' "$ordered_projects" |
-		sed "s#^$HOME/#~/#" |
-		fuzzel --dmenu --prompt="$prompt" --placeholder="Search projects..." || true
-)
+display_project_rows() {
+	while IFS= read -r project; do
+		if [[ "$project" == "$HOME/"* ]]; then
+			display_project="~/${project#"$HOME/"}"
+		else
+			display_project="$project"
+		fi
+		printf '%s\n' "$display_project"
+	done
+}
 
-[[ -n "$selection" ]] || exit 0
-selection="${selection/#\~/$HOME}"
-
-if [[ "$mode" == "choose" ]]; then
-	editor_selection=$(
-		{
-			command -v code >/dev/null 2>&1 && printf 'VS Code\n'
-			command -v zed >/dev/null 2>&1 && printf 'Zed\n'
-		} | fuzzel --dmenu --prompt="Open with > " --placeholder="Choose editor..." || true
-	)
-
-	case "$editor_selection" in
-		"VS Code") command_name="code" ;;
-		"Zed") command_name="zed" ;;
-		*) exit 0 ;;
-	esac
-fi
-
-mkdir -p "$state_dir"
-{
-	printf '%s\n' "$selection"
-	if [[ -f "$recent_file" ]]; then
-		grep -Fxv "$selection" "$recent_file" || true
+display_to_path() {
+	local selection=$1
+	if [[ "$selection" == "~/"* ]]; then
+		printf '%s' "$HOME/${selection#"~/"}"
+	else
+		printf '%s' "$selection"
 	fi
-} | awk 'NF' | head -100 >"$recent_file.tmp"
-mv "$recent_file.tmp" "$recent_file"
+}
 
-exec "$command_name" "$selection"
+remember_project() {
+	local selection=$1
+	mkdir -p "$state_dir"
+	{
+		printf '%s\n' "$selection"
+		if [[ -f "$recent_file" ]]; then
+			grep -Fxv "$selection" "$recent_file" || true
+		fi
+	} | awk 'NF' | head -100 >"$recent_file.tmp"
+	mv "$recent_file.tmp" "$recent_file"
+}
+
+copy_display_path() {
+	local path
+	path=$(display_to_path "$1")
+	setsid -f sh -c 'printf %s "$1" | wl-copy' sh "$path" >/dev/null 2>&1
+}
+
+pick_project_fuzzel() {
+	local prompt=$1 selection
+	selection=$(
+		ordered_projects |
+			sed "s#^$HOME/#~/#" |
+			fuzzel --dmenu --prompt="$prompt" --placeholder="Search projects..." || true
+	)
+	[[ -n "$selection" ]] || exit 0
+	printf '%s\n' "${selection/#\~/$HOME}"
+}
+
+open_project() {
+	local editor=$1 selection=$2 command_name
+	command_name=$(editor_command "$editor") || {
+		notify_error "Unknown editor: $editor"
+		exit 1
+	}
+	if ! command -v "$command_name" >/dev/null 2>&1; then
+		notify_error "$command_name is not installed"
+		exit 1
+	fi
+
+	remember_project "$selection"
+	exec "$command_name" "$selection"
+}
+
+run_tui() {
+	if ! command -v fzf >/dev/null 2>&1; then
+		notify_error "fzf is not installed"
+		exit 1
+	fi
+
+	local initial_editor script_path selection editor bind_tab bind_right
+	initial_editor=$(default_editor)
+	[[ -n "$initial_editor" ]] || {
+		notify_error "Neither code nor zed is installed"
+		exit 1
+	}
+	set_editor "$initial_editor"
+
+	script_path=$(readlink -f "$0")
+	bind_tab="tab:execute-silent($script_path --toggle-editor)+transform-prompt($script_path --print-header)"
+	bind_right="right:execute-silent($script_path --copy-display-path {})"
+
+	selection=$(
+		ordered_projects |
+			display_project_rows |
+			fzf \
+				--prompt="$(print_header)" \
+				--layout=reverse \
+				--highlight-line \
+				--bind="$bind_tab" \
+				--bind="$bind_right" || true
+	)
+	[[ -n "$selection" ]] || exit 0
+	selection=$(display_to_path "$selection")
+
+	editor=$(default_editor)
+	open_project "$editor" "$selection"
+}
+
+spawn_tui() {
+	if ! command -v kitty >/dev/null 2>&1; then
+		notify_error "kitty is not installed"
+		exit 1
+	fi
+
+	exec kitty --class project-picker --title "Project Picker" -o window_padding_width=3 -e "$0" --tui
+}
+
+case "${1:-choose}" in
+	choose) spawn_tui ;;
+	--tui) run_tui ;;
+	--toggle-editor) toggle_editor ;;
+	--print-header) print_header ;;
+	--copy-display-path) copy_display_path "${2:?}" ;;
+	code)
+		command -v fuzzel >/dev/null 2>&1 || {
+			notify_error "fuzzel is not installed"
+			exit 1
+		}
+		open_project code "$(pick_project_fuzzel 'Code > ')"
+		;;
+	zed)
+		command -v fuzzel >/dev/null 2>&1 || {
+			notify_error "fuzzel is not installed"
+			exit 1
+		}
+		open_project zed "$(pick_project_fuzzel 'Zed > ')"
+		;;
+	*)
+		printf 'Usage: project-picker [choose|code|zed]\n' >&2
+		exit 2
+		;;
+esac
