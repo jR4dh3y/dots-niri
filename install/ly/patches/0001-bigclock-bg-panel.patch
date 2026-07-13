@@ -1,0 +1,74 @@
+diff --git a/ly-ui/src/components/BigLabel.zig b/ly-ui/src/components/BigLabel.zig
+index bd9af6e..f79b610 100644
+--- a/ly-ui/src/components/BigLabel.zig
++++ b/ly-ui/src/components/BigLabel.zig
+@@ -151,6 +151,69 @@ pub fn childrenPosition(self: BigLabel) Position {
+ }
+ 
+ fn draw(self: *BigLabel) void {
++    if (self.text.len == 0) return;
++
++    // Solid background panel + border behind the big clock.
++    // Empty digit cells use ch=0 and are skipped by Cell.put, so without this
++    // fill the animation shows through the clock.
++    const pad: usize = 1;
++    const content_w = self.text.len * (CHAR_WIDTH + 1) - 1;
++    const content_h: usize = CHAR_HEIGHT;
++    const panel_w = content_w + (2 * pad);
++    const panel_h = content_h + (2 * pad);
++    const origin_x = if (self.component_pos.x >= pad) self.component_pos.x - pad else 0;
++    const origin_y = if (self.component_pos.y >= pad) self.component_pos.y - pad else 0;
++
++    // Fill panel (use space so Cell.put actually paints the background)
++    const fill = Cell.init(' ', self.fg, self.bg);
++    var yy: usize = 0;
++    while (yy < panel_h) : (yy += 1) {
++        var xx: usize = 0;
++        while (xx < panel_w) : (xx += 1) {
++            const x = origin_x + xx;
++            const y = origin_y + yy;
++            if (x < self.buffer.width and y < self.buffer.height) {
++                fill.put(x, y);
++            }
++        }
++    }
++
++    // Border matching the login box style
++    if (panel_w >= 2 and panel_h >= 2) {
++        const right = origin_x + panel_w - 1;
++        const bottom = origin_y + panel_h - 1;
++        const bfg = self.buffer.border_fg;
++        const bbg = self.bg;
++        var tl = Cell.init(self.buffer.box_chars.left_up, bfg, bbg);
++        var tr = Cell.init(self.buffer.box_chars.right_up, bfg, bbg);
++        var bl = Cell.init(self.buffer.box_chars.left_down, bfg, bbg);
++        var br = Cell.init(self.buffer.box_chars.right_down, bfg, bbg);
++        var top = Cell.init(self.buffer.box_chars.top, bfg, bbg);
++        var bot = Cell.init(self.buffer.box_chars.bottom, bfg, bbg);
++        var left = Cell.init(self.buffer.box_chars.left, bfg, bbg);
++        var rightc = Cell.init(self.buffer.box_chars.right, bfg, bbg);
++
++        if (origin_x < self.buffer.width and origin_y < self.buffer.height) tl.put(origin_x, origin_y);
++        if (right < self.buffer.width and origin_y < self.buffer.height) tr.put(right, origin_y);
++        if (origin_x < self.buffer.width and bottom < self.buffer.height) bl.put(origin_x, bottom);
++        if (right < self.buffer.width and bottom < self.buffer.height) br.put(right, bottom);
++
++        var x: usize = origin_x + 1;
++        while (x < right) : (x += 1) {
++            if (x < self.buffer.width) {
++                if (origin_y < self.buffer.height) top.put(x, origin_y);
++                if (bottom < self.buffer.height) bot.put(x, bottom);
++            }
++        }
++        var y: usize = origin_y + 1;
++        while (y < bottom) : (y += 1) {
++            if (y < self.buffer.height) {
++                if (origin_x < self.buffer.width) left.put(origin_x, y);
++                if (right < self.buffer.width) rightc.put(right, y);
++            }
++        }
++    }
++
+     for (self.text, 0..) |c, i| {
+         const clock_cell = clockCell(
+             c,
