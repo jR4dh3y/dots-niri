@@ -1,0 +1,4 @@
+# Keep the NVIDIA dGPU primary DRM node out of logind seats.
+# PRIME offload can still use the render node, but compositors such as niri
+# should not grab the NVIDIA KMS card when it is dynamically rebound.
+ACTION!="remove", SUBSYSTEM=="drm", KERNEL=="card[0-9]*", ENV{ID_PATH}=="pci-0000:01:00.0", TAG-="seat", TAG-="master-of-seat", TAG-="uaccess"

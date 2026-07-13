@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+GPU="0000:01:00.0"
+AUDIO="0000:01:00.1"
+VM="win10-rtx3050"
+
+need_root() {
+  if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
+    echo "Run with sudo." >&2
+    exit 1
+  fi
+}
+
+driver_for() {
+  local dev="$1"
+  if [[ -L "/sys/bus/pci/devices/$dev/driver" ]]; then
+    basename "$(readlink -f "/sys/bus/pci/devices/$dev/driver")"
+  else
+    echo "none"
+  fi
+}
+
+unbind_if_bound() {
+  local dev="$1"
+  if [[ -L "/sys/bus/pci/devices/$dev/driver" ]]; then
+    echo "$dev" > "/sys/bus/pci/devices/$dev/driver/unbind"
+  fi
+}
+
+enable_device() {
+  local dev="$1"
+  echo on > "/sys/bus/pci/devices/$dev/power/control" 2>/dev/null || true
+  echo 1 > "/sys/bus/pci/devices/$dev/enable" 2>/dev/null || true
+}
+
+bind_to() {
+  local dev="$1"
+  local module="$2"
+  local driver="$3"
+  echo "$driver" > "/sys/bus/pci/devices/$dev/driver_override"
+  if [[ "$(driver_for "$dev")" != "$driver" ]]; then
+    unbind_if_bound "$dev"
+    enable_device "$dev"
+    modprobe "$module"
+    echo "$dev" > /sys/bus/pci/drivers_probe || true
+  fi
+  if [[ "$(driver_for "$dev")" != "$driver" ]]; then
+    echo "$dev" > "/sys/bus/pci/drivers/$driver/bind"
+  fi
+  if [[ "$(driver_for "$dev")" != "$driver" ]]; then
+    echo "Failed to bind $dev to $driver" >&2
+    exit 1
+  fi
+}
+
+bind_gpu_to_nvidia() {
+  echo nvidia > "/sys/bus/pci/devices/$GPU/driver_override"
+  if [[ "$(driver_for "$GPU")" != "nvidia" ]]; then
+    unbind_if_bound "$GPU"
+    enable_device "$GPU"
+    sleep 0.5
+  fi
+
+  modprobe nvidia
+  modprobe nvidia_modeset
+  modprobe nvidia_uvm
+  modprobe nvidia_drm
+
+  if [[ "$(driver_for "$GPU")" != "nvidia" ]]; then
+    echo "$GPU" > /sys/bus/pci/drivers_probe || true
+  fi
+  if [[ "$(driver_for "$GPU")" != "nvidia" ]]; then
+    echo "$GPU" > /sys/bus/pci/drivers/nvidia/bind
+  fi
+  if [[ "$(driver_for "$GPU")" != "nvidia" ]]; then
+    echo "Failed to bind $GPU to nvidia" >&2
+    exit 1
+  fi
+}
+
+need_root
+
+if command -v virsh >/dev/null 2>&1; then
+  state="$(virsh -c qemu:///system domstate "$VM" 2>/dev/null || true)"
+  if [[ "$state" == "running" || "$state" == "paused" ]]; then
+    echo "$VM is $state. Shut it down before switching the GPU to Linux." >&2
+    exit 1
+  fi
+fi
+
+bind_to "$AUDIO" snd_hda_intel snd_hda_intel
+bind_gpu_to_nvidia
+
+systemctl start nvidia-powerd.service 2>/dev/null || true
+
+echo "Switched to NVIDIA PRIME:"
+echo "  $GPU -> $(driver_for "$GPU")"
+echo "  $AUDIO -> $(driver_for "$AUDIO")"
+echo
+echo "Test with: prime-run nvidia-smi"
