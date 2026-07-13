@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# Stabilize MT7921 + Airdopes after login/reboot.
+set -euo pipefail
+MAC="${BT_HEADSET_MAC:-41:86:4E:DF:B0:B6}"
+A2DP_UUID="0000110b-0000-1000-8000-00805f9b34fb"
+log() { echo "[bt-stabilize] $*"; }
+
+# Continuous discovery (blueman) kills flaky A2DP on this adapter
+bluetoothctl scan off >/dev/null 2>&1 || true
+
+for _ in $(seq 1 30); do
+  bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' && break
+  sleep 1
+done
+systemctl --user is-active --quiet wireplumber \
+  || systemctl --user start wireplumber pipewire pipewire-pulse || true
+sleep 1
+
+for dev in /sys/bus/usb/devices/*; do
+  if [ -f "$dev/idVendor" ] && [ "$(cat "$dev/idVendor" 2>/dev/null)" = "13d3" ] \
+     && [ -f "$dev/idProduct" ] && [ "$(cat "$dev/idProduct" 2>/dev/null)" = "3567" ]; then
+    if [ -w "$dev/power/control" ]; then
+      echo on >"$dev/power/control" || true
+      echo -1 >"$dev/power/autosuspend" 2>/dev/null || true
+    fi
+  fi
+done
+
+log "power-cycle adapter (clear half-dead AVDTP after boot)"
+bluetoothctl power off >/dev/null 2>&1 || true
+sleep 1
+bluetoothctl power on >/dev/null 2>&1 || true
+sleep 2
+bluetoothctl scan off >/dev/null 2>&1 || true
+
+if ! bluetoothctl devices | grep -qi "$MAC"; then
+  log "device $MAC not paired; skip connect"
+  exit 0
+fi
+
+log "disconnect stale link"
+bluetoothctl disconnect "$MAC" >/dev/null 2>&1 || true
+sleep 1
+
+log "connect A2DP only"
+if ! timeout 25 bluetoothctl connect "$MAC" "$A2DP_UUID" >/dev/null 2>&1; then
+  timeout 25 bluetoothctl connect "$MAC" >/dev/null 2>&1 || true
+fi
+sleep 2
+
+CARD="bluez_card.${MAC//:/_}"
+if pactl list cards short 2>/dev/null | grep -q "$CARD"; then
+  # a2dp-sink = AAC on this headset
+  pactl set-card-profile "$CARD" a2dp-sink 2>/dev/null \
+    || pactl set-card-profile "$CARD" a2dp-sink-sbc_xq 2>/dev/null \
+    || pactl set-card-profile "$CARD" a2dp-sink-sbc 2>/dev/null \
+    || true
+  SINK=$(pactl list sinks short 2>/dev/null | awk -v m="${MAC//:/_}" '$2 ~ m {print $2; exit}')
+  if [ -n "${SINK:-}" ]; then
+    pactl set-default-sink "$SINK" 2>/dev/null || true
+  fi
+fi
+
+connected=$(bluetoothctl info "$MAC" 2>/dev/null | awk '/^\tConnected:/{print $2; exit}')
+codec=$(pactl list sinks 2>/dev/null | awk -v m="${MAC//:/_}" '
+  $0 ~ m {f=1}
+  f && /api.bluez5.codec/ {gsub(/"/,"",$3); print $3; exit}
+')
+log "Connected=$connected codec=${codec:-none}"
+
+sleep 6
+connected2=$(bluetoothctl info "$MAC" 2>/dev/null | awk '/^\tConnected:/{print $2; exit}')
+if [ "$connected2" != "yes" ]; then
+  log "dropped after boot race; retry once"
+  bluetoothctl disconnect "$MAC" >/dev/null 2>&1 || true
+  sleep 1
+  timeout 25 bluetoothctl connect "$MAC" "$A2DP_UUID" >/dev/null 2>&1 \
+    || timeout 25 bluetoothctl connect "$MAC" >/dev/null 2>&1 || true
+  sleep 2
+  pactl set-card-profile "$CARD" a2dp-sink 2>/dev/null || true
+fi
+
+connected3=$(bluetoothctl info "$MAC" 2>/dev/null | awk '/^\tConnected:/{print $2; exit}')
+codec3=$(pactl list sinks 2>/dev/null | awk -v m="${MAC//:/_}" '
+  $0 ~ m {f=1}
+  f && /api.bluez5.codec/ {gsub(/"/,"",$3); print $3; exit}
+')
+log "final Connected=$connected3 codec=${codec3:-none}"

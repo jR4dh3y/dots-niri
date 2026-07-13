@@ -1,0 +1,14 @@
+[Unit]
+Description=Stabilize Bluetooth A2DP after login (MT7921 + TWS)
+After=pipewire.service wireplumber.service pipewire-pulse.service bluetooth.target
+Wants=wireplumber.service pipewire.service
+
+[Service]
+Type=oneshot
+# Give desktop + blueman a moment to settle before we power-cycle
+ExecStartPre=/bin/sleep 4
+ExecStart=/home/radhey/.local/bin/bt-stabilize
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

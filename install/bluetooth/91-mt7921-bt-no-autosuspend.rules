@@ -1,0 +1,5 @@
+# MediaTek MT7921 Bluetooth (IMC Networks 13d3:3567 on this HP laptop).
+# Prevent USB autosuspend during A2DP — otherwise:
+#   spa.bluez5.sink.media: Missing completion reports … firmware bug?
+ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="13d3", ATTR{idProduct}=="3567", TEST=="power/control", ATTR{power/control}="on", ATTR{power/autosuspend}="-1"
+ACTION=="add|change", SUBSYSTEM=="usb", KERNEL=="1-4", ATTR{idVendor}=="13d3", ATTR{idProduct}=="3567", RUN+="/bin/sh -c 'echo on > /sys/bus/usb/devices/usb1/power/control 2>/dev/null; echo on > /sys/bus/usb/devices/1-4/power/control 2>/dev/null; echo -1 > /sys/bus/usb/devices/1-4/power/autosuspend 2>/dev/null'"
