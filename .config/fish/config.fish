@@ -147,6 +147,242 @@ function mount-ext-drive
     and printf '0410\n' | sudo -S ntfs-3g /dev/sdb1 /mnt/ext-drive
 end
 
+
+# Violet Circuit prompt, matching ~/.config/nushell/config.nu.
+function __forge_color
+    set -l hex (string replace -a '#' '' -- $argv[1])
+
+    if test (count $argv) -gt 1; and test "$argv[2]" = b
+        set_color --bold $hex
+    else
+        set_color $hex
+    end
+end
+
+function __forge_path
+    set -l raw $PWD
+
+    if test "$PWD" = "$HOME"
+        set raw "~"
+    else if string match -q "$HOME/*" -- $PWD
+        set raw "~/"(string sub -s (math (string length -- $HOME) + 2) -- $PWD)
+    end
+
+    set -l parts (string split / -- $raw)
+
+    if test (string length -- $raw) -gt 42; and test (count $parts) -gt 3
+        if string match -q '/*' -- $raw
+            printf '/…/%s/%s' $parts[-2] $parts[-1]
+        else
+            printf '%s/…/%s/%s' $parts[1] $parts[-2] $parts[-1]
+        end
+    else
+        printf '%s' $raw
+    end
+end
+
+function __forge_git_status
+    command git rev-parse --is-inside-work-tree >/dev/null 2>/dev/null
+    or return 1
+
+    set -l branch (command git branch --show-current 2>/dev/null | string trim)
+    test -n "$branch"
+    or return 1
+
+    set -l staged 0
+    set -l unstaged 0
+    set -l untracked 0
+
+    for line in (command git status --porcelain=v1 2>/dev/null)
+        test -n "$line"
+        or continue
+
+        if string match -q '??*' -- $line
+            set untracked (math $untracked + 1)
+            continue
+        end
+
+        if test (string sub -s 1 -l 1 -- $line) != " "
+            set staged (math $staged + 1)
+        end
+
+        if test (string sub -s 2 -l 1 -- $line) != " "
+            set unstaged (math $unstaged + 1)
+        end
+    end
+
+    set -l ahead 0
+    set -l behind 0
+    set -l upstream (command git rev-list --left-right --count '@{upstream}...HEAD' 2>/dev/null)
+    set -l counts (string split -n -r '\s+' -- $upstream)
+
+    if test (count $counts) -ge 2
+        set behind $counts[1]
+        set ahead $counts[2]
+    end
+
+    printf '%s\n%s\n%s\n%s\n%s\n%s\n' $branch $staged $unstaged $untracked $ahead $behind
+end
+
+function __forge_git_prompt_segment
+    set -l git_status (__forge_git_status)
+    or return
+
+    if test (count $git_status) -lt 6
+        return
+    end
+
+    set -l branch $git_status[1]
+    set -l staged $git_status[2]
+    set -l unstaged $git_status[3]
+    set -l untracked $git_status[4]
+    set -l ahead $git_status[5]
+    set -l behind $git_status[6]
+
+    set -l muted (__forge_color 9c96ad)
+    set -l violet (__forge_color c59edc b)
+    set -l lime (__forge_color c3fb5b b)
+    set -l warning (__forge_color ffb86c b)
+    set -l red (__forge_color ff6e79 b)
+    set -l worktree
+
+    if test $staged -eq 0; and test $unstaged -eq 0; and test $untracked -eq 0
+        set worktree "$lime✓"
+    else
+        set -l worktree_parts
+
+        if test $staged -gt 0
+            set worktree_parts $worktree_parts "$lime+$staged"
+        end
+
+        if test $unstaged -gt 0
+            set worktree_parts $worktree_parts "$warning~$unstaged"
+        end
+
+        if test $untracked -gt 0
+            set worktree_parts $worktree_parts "$red?$untracked"
+        end
+
+        set worktree (string join "$muted " -- $worktree_parts)
+    end
+
+    set -l remote_parts
+
+    if test $ahead -gt 0
+        set remote_parts $remote_parts "$lime↑$ahead"
+    end
+
+    if test $behind -gt 0
+        set remote_parts $remote_parts "$red↓$behind"
+    end
+
+    set -l remote (string join "$muted " -- $remote_parts)
+    set -l remote_segment
+
+    if test -n "$remote"
+        set remote_segment " $remote"
+    end
+
+    printf '%s%s%s[%s%s%s]' $violet $branch $muted $worktree $remote_segment $muted
+end
+
+function __forge_duration_segment
+    if not set -q CMD_DURATION
+        return
+    end
+
+    if not string match -qr '^[0-9]+$' -- $CMD_DURATION
+        return
+    end
+
+    if test $CMD_DURATION -ge 5000
+        printf '%ss' (math $CMD_DURATION / 1000)
+    end
+end
+
+function __forge_context_segment
+    if set -q SSH_CONNECTION; and test -n "$SSH_CONNECTION"
+        printf 'ssh'
+    end
+end
+
+function __forge_right_prompt_text --argument-names last_status
+    set -l reset (set_color normal)
+    set -l muted (__forge_color 9c96ad)
+    set -l lilac (__forge_color e6dfef)
+    set -l warning (__forge_color ffb86c b)
+    set -l red (__forge_color ff6e79 b)
+    set -l parts
+
+    set -l context (__forge_context_segment)
+    if test -n "$context"
+        set parts $parts "$lilac$context"
+    end
+
+    set -l git_segment (__forge_git_prompt_segment)
+    if test -n "$git_segment"
+        set parts $parts "$git_segment"
+    end
+
+    if test $last_status -ne 0
+        set parts $parts "$red""exit $last_status"
+    end
+
+    set -l duration (__forge_duration_segment)
+    if test -n "$duration"
+        set parts $parts "$warning$duration"
+    end
+
+    set parts $parts "$muted"(date +%H:%M)
+
+    printf '%s%s' (string join "$muted · " -- $parts) $reset
+end
+
+function fish_prompt
+    set -g __forge_last_status $status
+
+    set -l reset (set_color normal)
+    set -l violet (__forge_color c59edc b)
+    set -l lime (__forge_color c3fb5b b)
+    set -l muted (__forge_color 9c96ad)
+    set -l status_color $lime
+
+    if test $__forge_last_status -ne 0
+        set status_color (__forge_color ff6e79 b)
+    end
+
+    set -l first_line "$muted┌ $violet"(__forge_path)"$reset"
+    set -l right_prompt (__forge_right_prompt_text $__forge_last_status)
+    set -l columns 80
+
+    if set -q COLUMNS; and string match -qr '^[0-9]+$' -- $COLUMNS; and test $COLUMNS -gt 0
+        set columns $COLUMNS
+    else
+        set -l tput_columns (command tput cols 2>/dev/null)
+        if string match -qr '^[0-9]+$' -- $tput_columns; and test $tput_columns -gt 0
+            set columns $tput_columns
+        end
+    end
+
+    set -l left_width (string length --visible -- $first_line)
+    set -l right_width (string length --visible -- $right_prompt)
+    set -l gap (math $columns - $left_width - $right_width)
+
+    if test $gap -gt 1
+        printf '%s%s%s\n' $first_line (string repeat -n $gap ' ') $right_prompt
+    else
+        printf '%s\n' $first_line
+    end
+
+    printf '%s└ %s❯%s ' $muted $status_color $reset
+end
+
+function fish_right_prompt
+end
+
+function fish_mode_prompt
+end
+
 # >>> grok installer >>>
 fish_add_path $HOME/.grok/bin
 # <<< grok installer <<<
