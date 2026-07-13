@@ -20,3 +20,7 @@
 # .config/fish/
 .config/waybar/libniri_taskbar-focused.so
 tools/
+
+# Python bytecode
+**/__pycache__/
+*.py[cod]
