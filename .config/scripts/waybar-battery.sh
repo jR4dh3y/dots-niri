@@ -40,44 +40,41 @@ battery_icon() {
 
 capacity=$(read_battery_value /sys/class/power_supply/BAT*/capacity)
 status=$(read_battery_value /sys/class/power_supply/BAT*/status)
-power_uw=$(read_battery_value /sys/class/power_supply/BAT*/power_now)
-power=$(awk -v value="${power_uw:-0}" 'BEGIN { printf "%.2f", value / 1000000 }')
+voltage_uv=$(read_battery_value /sys/class/power_supply/BAT*/voltage_now)
+energy_now=$(read_battery_value /sys/class/power_supply/BAT*/energy_now)
+energy_full=$(read_battery_value /sys/class/power_supply/BAT*/energy_full)
+voltage=$(awk -v v="${voltage_uv:-0}" 'BEGIN { printf "%.2f", v / 1000000 }')
+energy_wh=$(awk -v e="${energy_now:-0}" 'BEGIN { printf "%.2f", e / 1000000 }')
+energy_full_wh=$(awk -v e="${energy_full:-0}" 'BEGIN { printf "%.2f", e / 1000000 }')
+capacity_line="Capacity: ${energy_wh} / ${energy_full_wh} Wh"
+voltage_line="Voltage: ${voltage} V"
 
-time="N/A"
-
-if [ "$status" = "Discharging" ] && [ -n "${power_uw:-}" ] && [ "$power_uw" -gt 0 ]; then
-    energy=$(read_battery_value /sys/class/power_supply/BAT*/energy_now)
-    if [ -z "$energy" ]; then
-        energy=$(read_battery_value /sys/class/power_supply/BAT*/charge_now)
-        if [ -n "$energy" ]; then
-            voltage=$(read_battery_value /sys/class/power_supply/BAT*/voltage_now)
-            if [ -n "$voltage" ]; then
-                energy=$((energy * voltage / 1000000))
-            fi
+# Compute power draw from energy_now changes (no root needed)
+power_line=""
+cache="/tmp/waybar-battery-power.cache"
+if [ -n "${energy_now:-}" ] && [ -f "$cache" ]; then
+    read -r prev_energy prev_ts < "$cache" 2>/dev/null || true
+    if [ -n "${prev_energy:-}" ] && [ -n "${prev_ts:-}" ] && [ "$energy_now" -lt "$prev_energy" ] 2>/dev/null; then
+        now=$(date +%s%N)
+        dt=$(awk -v now="$now" -v prev="$prev_ts" 'BEGIN { printf "%.0f", (now - prev) }')
+        if [ "$dt" -gt 1000000000 ] 2>/dev/null; then
+            e_delta=$((prev_energy - energy_now))
+            power_w=$(awk -v e="$e_delta" -v d="$dt" 'BEGIN { printf "%.1f", e * 3600000 / d }')
+            power_line="Power: ${power_w} W"
         fi
     fi
-
-    if [ -n "$energy" ] && [ "$energy" -gt 0 ]; then
-        time=$(awk -v e="$energy" -v p="$power_uw" 'BEGIN {
-            hours = e / p
-            h = int(hours)
-            m = int((hours - h) * 60)
-            if (h > 0 || m > 0) {
-                printf "%dh %dm", h, m
-            } else {
-                printf "N/A"
-            }
-        }')
-    fi
 fi
+echo "$energy_now $(date +%s%N)" > "$cache"
 
-capacity=${capacity:-0}
-status=${status:-Unknown}
 icon=$(battery_icon "$capacity" "$status")
 text="$icon $capacity%"
-tooltip=$(printf 'Status: %s
-Power: %s W
-Time: %s' "$status" "$power" "$time")
+tooltip="Status: ${status}"
+tooltip="${tooltip}\nBattery: ${capacity}%"
+tooltip="${tooltip}\n${capacity_line}"
+if [ -n "$power_line" ]; then
+    tooltip="${tooltip}\n${power_line}"
+fi
+tooltip="${tooltip}\n${voltage_line}"
 
 classes=()
 if [ "$status" = "Charging" ] || [ "$status" = "Full" ] || [ "$status" = "Not charging" ]; then
@@ -96,6 +93,7 @@ import json
 import sys
 
 text, tooltip, status, capacity, class_names = sys.argv[1:6]
+tooltip = tooltip.replace("\\n", "\n")
 payload = {
     "text": text,
     "tooltip": tooltip,

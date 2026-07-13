@@ -18,6 +18,8 @@
     "modules-right": [
       "privacy",
       "custom/separator",
+      "custom/gpu-switch",
+      "custom/separator",
       "tray",
       "custom/separator",
       "group/status-group",

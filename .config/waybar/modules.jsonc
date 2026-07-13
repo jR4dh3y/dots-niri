@@ -48,7 +48,7 @@
    "custom/battery": {
       "exec": "$HOME/.config/scripts/waybar-battery.sh",
       "return-type": "json",
-      "interval": 15,
+      "interval": 5,
       "format": "{}"
    },
 
@@ -98,6 +98,18 @@
       "spacing": 8
    },
 
+   "custom/gpu-switch": {
+      "exec": "$HOME/.config/scripts/waybar-gpu-switch.sh status",
+      "return-type": "json",
+      "interval": 5,
+      "signal": 9,
+      "format": "{}",
+      "tooltip": true,
+      "on-click": "$HOME/.config/scripts/waybar-gpu-switch.sh menu",
+      "on-click-right": "$HOME/.config/scripts/waybar-gpu-switch.sh to-linux",
+      "on-click-middle": "$HOME/.config/scripts/waybar-gpu-switch.sh toggle-vm"
+   },
+
    "group/status-group": {
       "orientation": "inherit",
       "modules": [
@@ -141,7 +153,7 @@
             "disk"
         ]
     },
-   
+
    "idle_inhibitor": {
        "format": "{icon}",
        "format-icons": {
@@ -167,8 +179,8 @@
       "tooltip": true
    },
    "custom/gpu2": {
-      "exec": "nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw --format=csv,noheader,nounits 2>/dev/null | head -1 | awk -F',' '{usage=$1; mem_used=$2; mem_total=$3; temp=$4; power=$5; printf \"{\\\"text\\\":\\\"%s%%\\\",\\\"tooltip\\\":\\\"GPU: %s%%\\\\nMemory: %s/%s MB\\\\nTemperature: %s°C\\\\nPower: %sW\\\"}\", usage, usage, mem_used, mem_total, temp, power}' || echo '{\"text\":\"N/A\",\"tooltip\":\"GPU not available\"}'",
-      "return-type": "json",  
+      "exec": "$HOME/.config/scripts/waybar-nvidia.sh",
+      "return-type": "json",
       "interval": 5,
       "format": "NVIDIA:{text}",
       "format-icons": {
@@ -205,11 +217,12 @@
    "disk": {
       "path" : "/",
       "interval": 5,
-      "format": "DISK:{used}",
+      "format": "DISK:{free}",
       "format-icons": {
          "default": ["󰋊"]
       },
-      "tooltip": true
+      "tooltip": true,
+      "tooltip-format": "Used: {used}\nFree: {free}\nTotal: {total}\nPercentage: {percentage_used}%"
    },
    "power-profiles-daemon": {
       "format": "{icon}",
@@ -232,7 +245,7 @@
    "custom/separator": {
       "return-type": "text",
       "interval": "once",
-      "format": "·",
+      "format": "",
       "tooltip": false
    },
 
