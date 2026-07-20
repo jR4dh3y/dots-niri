@@ -116,6 +116,7 @@
          "custom/updates",
          "idle_inhibitor",
          "custom/notifications",
+         "custom/nightlight",
          "power-profiles-daemon"
       ]
    },
@@ -240,6 +241,15 @@
       "return-type": "json",
       "restart-interval": 2,
       "on-click": "dunstctl set-paused toggle"
+   },
+
+   "custom/nightlight": {
+      "exec": "$HOME/.config/scripts/waybar-nightlight.sh watch",
+      "return-type": "json",
+      "on-click": "$HOME/.config/scripts/waybar-nightlight.sh toggle",
+      "on-scroll-up": "$HOME/.config/scripts/waybar-nightlight.sh up",
+      "on-scroll-down": "$HOME/.config/scripts/waybar-nightlight.sh down",
+      "tooltip": true
    },
 
    "custom/separator": {

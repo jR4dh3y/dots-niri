@@ -27,9 +27,7 @@ gamemode
 github-cli
 go
 gparted
-grimblast-git
-hyprpolkitagent
-hyprsunset
+grim
 imv
 inxi
 iwd
@@ -49,6 +47,7 @@ qt5-quickcontrols2
 qt6ct
 sassc
 satty
+slurp
 scrcpy
 swayidle
 awww
@@ -87,7 +86,7 @@ wget
 wireplumber
 xarchiver
 xdg-desktop-portal-gnome
-hyprlock
+swaylock-effects
 wl-clipboard
 wtype
 tesseract

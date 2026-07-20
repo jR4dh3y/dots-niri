@@ -195,12 +195,24 @@ toggle_vm() {
 }
 
 open_looking_glass() {
+    local state display port
+
+    state=$(vm_state)
+    if [[ "$state" != "running" && "$state" != "paused" ]]; then
+        notify "Looking Glass unavailable" "Start $VM before opening the client."
+        return 1
+    fi
+
     if command -v looking-glass-client >/dev/null 2>&1; then
+        display=$(virsh -c qemu:///system domdisplay "$VM" --type spice 2>/dev/null || true)
+        port=${display##*:}
+        [[ "$port" =~ ^[0-9]+$ ]] || port=5900
+
         looking-glass-client \
             -F \
             app:shmFile=/dev/shm/looking-glass \
             spice:host=127.0.0.1 \
-            spice:port=5900 \
+            spice:port="$port" \
             spice:input=yes \
             spice:clipboard=yes \
             spice:captureOnStart=yes \

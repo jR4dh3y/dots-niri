@@ -4,6 +4,7 @@ set -euo pipefail
 GPU="0000:01:00.0"
 AUDIO="0000:01:00.1"
 VM="win10-rtx3050"
+LOCK="/run/lock/gpu-switch.lock"
 
 need_root() {
   if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
@@ -47,7 +48,23 @@ bind_to() {
   fi
 }
 
+unload_nvidia_modules() {
+  local module
+
+  for module in nvidia_drm nvidia_uvm nvidia_modeset nvidia; do
+    if [[ -d "/sys/module/$module" ]] && ! modprobe -r "$module"; then
+      echo "Warning: could not unload $module; the GPU is bound to VFIO but a stale NVIDIA module remains." >&2
+    fi
+  done
+}
+
 need_root
+exec 9>"$LOCK"
+flock -n 9 || { echo "Another GPU switch is already running." >&2; exit 1; }
+
+for dev in "$GPU" "$AUDIO"; do
+  [[ -d "/sys/bus/pci/devices/$dev" ]] || { echo "PCI device $dev is missing." >&2; exit 1; }
+done
 
 if command -v virsh >/dev/null 2>&1; then
   state="$(virsh -c qemu:///system domstate "$VM" 2>/dev/null || true)"
@@ -60,15 +77,17 @@ fi
 systemctl stop nvidia-persistenced.service nvidia-powerd.service 2>/dev/null || true
 
 if compgen -G "/dev/nvidia*" >/dev/null; then
-  if fuser /dev/nvidia* >/tmp/gpu-to-vfio.fuser 2>/dev/null; then
+  if users=$(fuser /dev/nvidia* 2>/dev/null); then
     echo "NVIDIA device is still in use. Close Linux games/apps first:" >&2
-    cat /tmp/gpu-to-vfio.fuser >&2
+    echo "$users" >&2
     exit 1
   fi
 fi
 
 bind_to "$AUDIO" vfio_pci vfio-pci
 bind_to "$GPU" vfio_pci vfio-pci
+unload_nvidia_modules
+udevadm settle --timeout=10 || true
 
 echo "Switched to VFIO:"
 echo "  $GPU -> $(driver_for "$GPU")"

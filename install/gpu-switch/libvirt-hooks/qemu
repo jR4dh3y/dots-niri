@@ -1,31 +1,93 @@
 #!/usr/bin/env bash
-# libvirt qemu hook — free NBD before VM starts; reconnect after (no auto-mount)
+# Keep the guest qcow2 exclusive: detach host NBD before start, reconnect after stop.
 set -euo pipefail
 
 VM="${1:-}"
 OP="${2:-}"
+PHASE="${3:-}"
 
-# Only act on the Windows VM
 [[ "$VM" == "win10-rtx3050" ]] || exit 0
+
+case "$OP:$PHASE" in
+    prepare:begin|release:end|prepare:|release:)
+        ;;
+    *)
+        exit 0
+        ;;
+esac
 
 NBD="/dev/nbd0"
 PART="${NBD}p3"
-MNT="/mnt/windows"
-QCOW="/var/lib/libvirt/images/win10-rtx3050.qcow2"
+QCOW="/var/lib/libvirt/images-nocow/win10-rtx3050.qcow2"
+
+log() {
+    logger -t "libvirt-nbd-hook[$VM]" -- "$*"
+}
+
+nbd_connected() {
+    [[ -s /sys/class/block/nbd0/pid ]]
+}
+
+unmount_guest_disk() {
+    local target
+    local -a targets=()
+
+    while IFS= read -r target; do
+        [[ -n "$target" ]] && targets+=("$target")
+    done < <(findmnt -rn -S "$PART" -o TARGET 2>/dev/null || true)
+
+    for target in "${targets[@]}"; do
+        if ! umount "$target"; then
+            log "refusing VM start: could not unmount $target"
+            return 1
+        fi
+    done
+}
+
+disconnect_nbd() {
+    local attempt
+
+    nbd_connected || return 0
+    qemu-nbd --disconnect "$NBD"
+
+    for attempt in {1..50}; do
+        nbd_connected || return 0
+        sleep 0.1
+    done
+
+    log "refusing VM start: $NBD remained connected"
+    return 1
+}
 
 case "$OP" in
     prepare)
-        # VM about to start — unmount if mounted and disconnect NBD so libvirt gets write lock
-        if findmnt -n "$MNT" >/dev/null 2>&1; then
-            umount "$MNT" 2>/dev/null || umount -l "$MNT" 2>/dev/null || true
-        fi
-        # also unmount any udisks mounts of the partition
-        umount "$PART" 2>/dev/null || true
-        qemu-nbd -d "$NBD" 2>/dev/null || true
+        unmount_guest_disk
+        disconnect_nbd
+        log "host NBD detached; guest disk is ready"
         ;;
     release)
-        # VM stopped — reconnect NBD so Dolphin can discover the volume; user mounts on demand
-        modprobe nbd max_part=8 2>/dev/null || true
-        qemu-nbd --cache=none -c "$NBD" "$QCOW" 2>/dev/null || true
+        if [[ ! -f "$QCOW" ]]; then
+            log "cannot reconnect NBD: image is missing at $QCOW"
+            exit 0
+        fi
+
+        modprobe nbd max_part=16
+        if ! nbd_connected; then
+            if qemu-nbd --cache=none --connect="$NBD" "$QCOW"; then
+                blockdev --rereadpt "$NBD" || true
+                udevadm settle --timeout=10 || true
+                for _ in {1..50}; do
+                    [[ -b "$PART" ]] && break
+                    sleep 0.1
+                done
+                if [[ -b "$PART" ]]; then
+                    log "reconnected $QCOW on $NBD"
+                else
+                    log "reconnected $QCOW on $NBD, but $PART did not appear"
+                fi
+            else
+                log "failed to reconnect $QCOW on $NBD"
+            fi
+        fi
         ;;
 esac

@@ -1,0 +1,55 @@
+daemonize
+ignore-empty-password
+show-failed-attempts
+grace=2
+grace-no-mouse
+grace-no-touch
+
+image=/home/radhey/.local/share/wallpapers/vicodin.png
+scaling=fill
+effect-blur=8x3
+effect-vignette=0.35:0.35
+fade-in=0.2
+
+clock
+timestr=%H:%M:%S
+datestr=%A · %d %B
+indicator
+indicator-idle-visible
+indicator-caps-lock
+indicator-radius=230
+indicator-thickness=6
+indicator-x-position=960
+indicator-y-position=430
+
+font=JetBrainsMono Nerd Font
+font-size=28
+inside-color=2a2a2cbb
+inside-clear-color=2a2a2cbb
+inside-caps-lock-color=2a2a2cbb
+inside-ver-color=2a2a2cbb
+inside-wrong-color=2a2a2cbb
+ring-color=c59edcff
+ring-clear-color=c59edcff
+ring-caps-lock-color=ffb86cff
+ring-ver-color=c3fb5bff
+ring-wrong-color=ff6e79ff
+key-hl-color=c3fb5bff
+bs-hl-color=ff6e79ff
+caps-lock-key-hl-color=ffb86cff
+caps-lock-bs-hl-color=ff6e79ff
+line-color=00000000
+line-clear-color=00000000
+line-caps-lock-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+separator-color=00000000
+text-color=ffffffff
+text-clear-color=ffffffff
+text-caps-lock-color=ffb86cff
+text-ver-color=c3fb5bff
+text-wrong-color=ff6e79ff
+text-clear=Cleared
+text-caps-lock=Caps Lock
+text-ver=Checking...
+text-wrong=Wrong password

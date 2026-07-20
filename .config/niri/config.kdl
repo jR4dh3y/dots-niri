@@ -44,14 +44,18 @@ debug {
     // Keep niri rendering on the AMD iGPU so the NVIDIA dGPU can be
     // switched between PRIME offload and VFIO passthrough.
     render-drm-device "/dev/dri/by-path/pci-0000:06:00.0-render"
+
+    // NVIDIA PRIME games cannot reliably direct-scan-out through the AMD
+    // display GPU. Compositing them avoids the black frame with live audio.
+    disable-direct-scanout
 }
 
 output "eDP-1" {
     // off
-    mode "1920x1080@144"
+    mode "1920x1080@144.149"
     scale 1
     transform "normal"
-    position x=1280 y=0
+    position x=0 y=0
 }
 
 layout {
@@ -72,7 +76,7 @@ layout {
     border {
         on
         width 1
-        active-gradient from="#80c8ff" to="#dcbbffff" angle=45 relative-to="window"
+        active-gradient from="#c59edc" to="#c3fb5b"
     }
     shadow {
         on
@@ -102,19 +106,21 @@ environment {
 
 // Render Wallpaper Engine's "Wallpaper Pop-out" X11 window directly as a
 // background layer surface through the custom Xwayland Satellite bridge.
-xwayland-satellite {
-    path "~/.local/bin/xwayland-satellite-wallpaper"
-}
+// xwayland-satellite {
+//     path "~/.local/bin/xwayland-satellite-wallpaper"
+// }
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "waybar"
 spawn-at-startup "dunst"
+spawn-at-startup "wl-gammarelay-rs"
 // Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
 // required by apps like Mailspring that use libsecret for credential storage.
 spawn-at-startup "sh" "-c" "sleep 1 && exec gnome-keyring-daemon --start"
 // spawn-at-startup "sh" "-c" "sleep 1 && pgrep -xa tailscale | grep -q ' systray$' || exec tailscale systray"
 spawn-at-startup "sh" "-c" "sleep 4 && pgrep -x solaar >/dev/null || exec solaar -w hide"
-spawn-at-startup "sh" "-c" "sleep 4 && pgrep -x warp-taskbar >/dev/null || exec warp-taskbar"
+// warp-taskbar is owned by its packaged user service. Starting it directly
+// here makes it spin when the warp-svc daemon has not started yet.
 spawn-at-startup "sh" "-c" "sleep 6 && pgrep -x Discord >/dev/null || pgrep -x discord >/dev/null || exec discord --start-minimized"
 spawn-at-startup "awww-daemon"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
@@ -429,7 +435,7 @@ binds {
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
-    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "hyprlock"; }
+    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "swaylock"; }
     Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
     Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
     Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
@@ -558,4 +564,3 @@ binds {
 
     Mod+Shift+P { power-off-monitors; }
 }
-

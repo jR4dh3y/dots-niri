@@ -140,13 +140,37 @@ install_nm_iwd_config() {
 install_gpu_switch_config() {
 	local helper_dir="$INSTALL_DIR/gpu-switch/usr-local-sbin"
 	local udev_rule="$INSTALL_DIR/gpu-switch/udev/90-nvidia-no-seat.rules"
+	local libvirt_hook="$INSTALL_DIR/gpu-switch/libvirt-hooks/qemu"
+	local modprobe_dir="$INSTALL_DIR/gpu-switch/modprobe"
+	local modules_load_dir="$INSTALL_DIR/gpu-switch/modules-load"
 	local helper
+	local config
 
 	if [[ -d "$helper_dir" ]]; then
 		msg "Syncing GPU switch helpers"
 		for helper in "$helper_dir"/*; do
 			[[ -f "$helper" ]] || continue
 			$SUDO_CMD install -Dm755 "$helper" "/usr/local/sbin/$(basename "$helper")"
+		done
+	fi
+
+	if [[ -f "$libvirt_hook" ]]; then
+		msg "Syncing libvirt GPU/guest-disk hook"
+		$SUDO_CMD install -Dm755 "$libvirt_hook" /etc/libvirt/hooks/qemu
+	fi
+
+	if [[ -d "$modprobe_dir" ]]; then
+		msg "Syncing GPU driver module configuration"
+		for config in "$modprobe_dir"/*.conf; do
+			[[ -f "$config" ]] || continue
+			$SUDO_CMD install -Dm644 "$config" "/etc/modprobe.d/$(basename "$config")"
+		done
+	fi
+
+	if [[ -d "$modules_load_dir" ]]; then
+		for config in "$modules_load_dir"/*.conf; do
+			[[ -f "$config" ]] || continue
+			$SUDO_CMD install -Dm644 "$config" "/etc/modules-load.d/$(basename "$config")"
 		done
 	fi
 

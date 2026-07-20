@@ -14,7 +14,9 @@ driver_for() {
   fi
 }
 
-echo "GPU driver:   $(driver_for "$GPU")"
+gpu_driver=$(driver_for "$GPU")
+
+echo "GPU driver:   $gpu_driver"
 echo "Audio driver: $(driver_for "$AUDIO")"
 
 if command -v virsh >/dev/null 2>&1; then
@@ -22,7 +24,7 @@ if command -v virsh >/dev/null 2>&1; then
   [[ -n "$state" ]] && echo "VM state:     $state"
 fi
 
-if command -v nvidia-smi >/dev/null 2>&1; then
+if [[ "$gpu_driver" == "nvidia" ]] && command -v nvidia-smi >/dev/null 2>&1; then
   echo
   nvidia-smi 2>&1 | sed -n '1,18p' || true
 fi

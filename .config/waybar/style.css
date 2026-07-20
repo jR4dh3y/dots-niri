@@ -152,10 +152,12 @@ window#waybar > box {
 #status-group #custom-updates,
 #status-group #idle_inhibitor,
 #status-group #custom-notifications,
+#status-group #custom-nightlight,
 #status-group #power-profiles-daemon,
 #group-status-group #custom-updates,
 #group-status-group #idle_inhibitor,
 #group-status-group #custom-notifications,
+#group-status-group #custom-nightlight,
 #group-status-group #power-profiles-daemon,
 #audio-group #backlight,
 #audio-group #pulseaudio,
@@ -193,8 +195,13 @@ window#waybar > box {
 
 #custom-notifications,
 #custom-updates,
-#idle_inhibitor {
+#idle_inhibitor,
+#custom-nightlight {
     color: @first_right_color;
+}
+
+#custom-nightlight.activated {
+    color: @caution_color;
 }
 
 #pulseaudio {
