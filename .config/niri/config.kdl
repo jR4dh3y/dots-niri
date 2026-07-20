@@ -110,8 +110,8 @@ environment {
 //     path "~/.local/bin/xwayland-satellite-wallpaper"
 // }
 
-// This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-at-startup "waybar"
+// Disabled while testing Nonchalant Shell as the replacement panel.
+// spawn-at-startup "waybar"
 spawn-at-startup "dunst"
 spawn-at-startup "wl-gammarelay-rs"
 // Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
