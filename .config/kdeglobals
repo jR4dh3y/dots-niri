@@ -1,9 +1,11 @@
 [ColorEffects:Disabled]
+ChangeSelectionColor=
 Color=30,30,32
 ColorAmount=0.35
 ColorEffect=2
 ContrastAmount=0.1
 ContrastEffect=0
+Enable=
 IntensityAmount=-1
 IntensityEffect=0
 
@@ -117,7 +119,7 @@ ForegroundPositive=195,251,91
 ForegroundVisited=230,223,239
 
 [General]
-ColorScheme=NonchalantPurple
+ColorSchemeHash=4b169d96b071634f5b3e8a5c16091a3a00fcf5bc
 Name=Nonchalant-Purple
 accentActiveTitlebar=false
 shadeSortColumn=true
@@ -129,6 +131,7 @@ Theme=Papirus-Dark
 [KDE]
 LookAndFeelPackage=org.kde.breezedark.desktop
 contrast=4
+frameContrast=0.2
 widgetStyle=Breeze
 
 [WM]

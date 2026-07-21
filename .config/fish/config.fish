@@ -386,3 +386,6 @@ end
 # >>> grok installer >>>
 fish_add_path $HOME/.grok/bin
 # <<< grok installer <<<
+
+# kimi-code
+fish_add_path -g "/home/radhey/.kimi-code/bin"

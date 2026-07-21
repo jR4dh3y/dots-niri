@@ -110,8 +110,10 @@ environment {
 //     path "~/.local/bin/xwayland-satellite-wallpaper"
 // }
 
-// Disabled while testing Nonchalant Shell as the replacement panel.
+// Nonchalant Shell replaces waybar as the panel / bar / lock host.
 // spawn-at-startup "waybar"
+spawn-at-startup "qs" "-p" "/home/radhey/code/random/nshell/shell"
+// dunst is still used for external app notifications; shell owns volume/brightness OSD.
 spawn-at-startup "dunst"
 spawn-at-startup "wl-gammarelay-rs"
 // Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
@@ -429,10 +431,11 @@ window-rule {
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
 
-    // Fuzzel launcher and rsclip clipboard, with lightweight project helpers.
-    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    // Nonchalant Shell IPC — launcher, lock, power, media OSD
+    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
+    Mod+D hotkey-overlay-title="Open Dashboard" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "system-monitor"; }
     Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "rsclip" "show"; }
-    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
     Mod+C hotkey-overlay-title="Open Project" { spawn "/home/radhey/.local/bin/project-picker"; }
     Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "/home/radhey/.local/bin/project-picker" "zed"; }
 
@@ -442,22 +445,24 @@ binds {
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
-    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn ".config/scripts/wlogout.sh"; }
+    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
+    Mod+Escape hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
-    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "swaylock"; }
-    Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
+    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "lockscreen" "lock"; }
+    Mod+Z hotkey-overlay-title="Reload Nonchalant" { spawn "sh" "-c" "pkill -f 'qs -p /home/radhey/code/random/nshell/shell' || true; sleep 0.2; exec qs -p /home/radhey/code/random/nshell/shell"; }
     Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
     Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
 
-    XF86AudioRaiseVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
-    XF86AudioLowerVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
-    XF86AudioMute         allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute      allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
-	XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "+5%"; }
+    // Route media keys through Nonchalant so the bar OSD updates.
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "increment"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "decrement"; }
+    XF86AudioMute         allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMute"; }
+    XF86AudioMicMute      allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMicMute"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "decrement"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "increment"; }
 
     Mod+Tab repeat=false { toggle-overview; }
 
