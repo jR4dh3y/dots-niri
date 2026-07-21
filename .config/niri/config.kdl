@@ -446,7 +446,6 @@ binds {
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
     Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
-    Mod+Escape hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
