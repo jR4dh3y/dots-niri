@@ -113,8 +113,9 @@ environment {
 // Nonchalant Shell replaces waybar as the panel / bar / lock host.
 // spawn-at-startup "waybar"
 spawn-at-startup "qs" "-p" "/home/radhey/code/random/nshell/shell"
-// dunst is still used for external app notifications; shell owns volume/brightness OSD.
-spawn-at-startup "dunst"
+// Shell owns org.freedesktop.Notifications (history + toast popups). Do not
+// start dunst alongside it or the bus name will fight for ownership.
+// spawn-at-startup "dunst"
 spawn-at-startup "wl-gammarelay-rs"
 // Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
 // required by apps like Mailspring that use libsecret for credential storage.
