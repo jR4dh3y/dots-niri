@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Claude
+Exec=/home/radhey/.config/scripts/browser-app https://claude.ai/
+Icon=/home/radhey/.local/share/applications/icons/claude.svg
+StartupWMClass=chrome-claude.ai__-Default

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ChatGPT
+Exec=/home/radhey/.config/scripts/browser-app https://chatgpt.com/
+Icon=/home/radhey/.local/share/applications/icons/chatgpt.svg
+StartupWMClass=chrome-chatgpt.com__-Default
