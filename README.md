@@ -112,6 +112,10 @@ wallpaper manager in the QuickShell dashboard (`Mod+D`).
 | `Mod+Space`, `Alt+Space` | Local/cloud transcription | Unbound |
 | Media and brightness keys | System commands with Dunst OSD | Nonchalant OSD |
 
+Only the five named workspaces are bound (`web`, `dev`, `chat`, `media`, and
+`vm`). Niri still keeps one empty dynamic workspace, but it will no longer
+create the extra numbered 6–9 workspaces from these profiles.
+
 ## Troubleshooting
 
 - Pacman is locked: remove the stale DB lock: `sudo rm -f /var/lib/pacman/db.lck`

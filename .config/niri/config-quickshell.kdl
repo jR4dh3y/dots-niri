@@ -494,19 +494,11 @@ binds {
     Mod+3 { focus-workspace "chat"; }
     Mod+4 { focus-workspace "media"; }
     Mod+5 { focus-workspace "vm"; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
     Mod+Shift+1 { move-column-to-workspace "web"; }
     Mod+Shift+2 { move-column-to-workspace "dev"; }
     Mod+Shift+3 { move-column-to-workspace "chat"; }
     Mod+Shift+4 { move-column-to-workspace "media"; }
     Mod+Shift+5 { move-column-to-workspace "vm"; }
-    Mod+Shift+6 { move-column-to-workspace 6; }
-    Mod+Shift+7 { move-column-to-workspace 7; }
-    Mod+Shift+8 { move-column-to-workspace 8; }
-    Mod+Shift+9 { move-column-to-workspace 9; }
 
     Mod+BracketLeft  { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
