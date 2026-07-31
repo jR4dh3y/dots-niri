@@ -80,8 +80,8 @@ The installer auto-detects:
 
 ### Switching desktop rices
 
-The Niri config can run either the Waybar rice or the Nonchalant QuickShell
-rice. The selection persists across sessions:
+Niri has separate `config-waybar.kdl` and `config-quickshell.kdl` profiles. The
+small `config.kdl` bootstrap loads the persisted selection at login:
 
 ```bash
 rice status
@@ -93,9 +93,11 @@ rice reload
 
 QuickShell is the default. Its checkout is expected at
 `~/code/random/nshell/shell`; set `NONCHALANT_SHELL_PATH` if it lives elsewhere.
-The switcher keeps Waybar/Dunst and QuickShell from competing for the tray and
-notification D-Bus services, and Niri's launcher, lock, power, reload, audio,
-and brightness bindings follow the active rice.
+The switcher loads the matching Niri profile and keeps Waybar/Dunst and
+QuickShell from competing for the tray and notification D-Bus services. The
+Waybar profile starts `awww` and binds `Mod+Shift+W` to WallpyGUI. The
+QuickShell profile stops `awww`, leaves that binding unused, and relies on the
+wallpaper manager in the QuickShell dashboard (`Mod+D`).
 
 ## Troubleshooting
 

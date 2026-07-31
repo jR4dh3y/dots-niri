@@ -1,0 +1,563 @@
+input {
+    keyboard {
+        xkb {
+        }
+        numlock
+    }
+    touchpad {
+        // off
+        tap
+        dwt
+        dwtp
+        // drag false
+        // drag-lock
+        natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "two-finger"
+        // disabled-on-external-mouse
+    }
+
+    mouse {
+        // off
+        // natural-scroll
+        accel-speed 0
+        accel-profile "flat"
+        // scroll-method "no-scroll"
+    }
+
+    trackpoint {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "on-button-down"
+        // scroll-button 273
+        // middle-emulation
+    }
+
+    //warp-mouse-to-focus
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+debug {
+    // NVIDIA PRIME games cannot reliably direct-scan-out through the AMD
+    // display GPU. Compositing them avoids the black frame with live audio.
+    disable-direct-scanout
+}
+
+output "eDP-1" {
+    // off
+    mode "1920x1080@144.149"
+    scale 1
+    transform "normal"
+    position x=0 y=0
+}
+
+layout {
+    gaps 0
+    center-focused-column "never"
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+    }
+
+    default-column-width { proportion 0.5; }
+    focus-ring {
+        off
+        inactive-color "#505050"
+    }
+    border {
+        on
+        width 1
+        active-gradient from="#c59edc" to="#c3fb5b"
+    }
+    shadow {
+        on
+        softness 50
+        spread 12
+        offset x=0 y=8
+        color "#00000060"
+    }
+    struts {
+        // left 64
+        // right 64
+        // top 64
+        // bottom 64
+    }
+}
+
+// Named workspaces for app placement
+workspace "web"
+workspace "dev"
+workspace "chat"
+workspace "media"
+workspace "vm"
+
+environment {
+    XDG_MENU_PREFIX "arch-"
+}
+
+// Render Wallpaper Engine's "Wallpaper Pop-out" X11 window directly as a
+// background layer surface through the custom Xwayland Satellite bridge.
+// xwayland-satellite {
+//     path "~/.local/bin/xwayland-satellite-wallpaper"
+// }
+
+// The rice helper owns the Waybar, dunst, and awww lifecycle for this profile.
+spawn-at-startup "sh" "-c" "pgrep -f '^wl-gammarelay-rs( |$)' >/dev/null || exec wl-gammarelay-rs"
+// Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
+// required by apps like Mailspring that use libsecret for credential storage.
+spawn-at-startup "sh" "-c" "sleep 1 && pgrep -x gnome-keyring-d >/dev/null || exec gnome-keyring-daemon --start"
+// spawn-at-startup "sh" "-c" "sleep 1 && pgrep -xa tailscale | grep -q ' systray$' || exec tailscale systray"
+spawn-at-startup "sh" "-c" "sleep 4 && pgrep -x solaar >/dev/null || exec solaar -w hide"
+// warp-taskbar is owned by its packaged user service. Starting it directly
+// here makes it spin when the warp-svc daemon has not started yet.
+spawn-at-startup "sh" "-c" "sleep 6 && pgrep -x Discord >/dev/null || pgrep -x discord >/dev/null || exec discord --start-minimized"
+spawn-at-startup "sh" "-c" "pgrep -f '^/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1$' >/dev/null || exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+spawn-at-startup "systemctl" "--user" "start" "rsclipd.service"
+spawn-at-startup "systemctl" "--user" "start" "rsclip-ui.service"
+spawn-at-startup "sh" "-c" "sleep 3 && pgrep -x victus-tray >/dev/null || exec victus-tray"
+// KDE daemon -- required for Dolphin's "Open With" dialog, MIME associations,
+// and other KIO services. Without it, Dolphin can't discover installed apps.
+// Delay kded6 so waybar can claim the StatusNotifierWatcher D-Bus name first;
+// otherwise kded6 claims it but doesn't export the object path, breaking the tray.
+spawn-at-startup "sh" "-c" "sleep 3 && pgrep -x kded6 >/dev/null || exec kded6"
+
+prefer-no-csd
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+animations {
+    slowdown 0.7
+}
+
+window-rule {
+    geometry-corner-radius 0
+    clip-to-geometry true
+    popups {
+        geometry-corner-radius 0
+    }
+}
+
+window-rule {
+    match app-id=r#"^(code|Code|VSCodium|zen|google-chrome|chromium|firefox|discord|steam|dev.zed.Zed|helium|t3code)$"#
+    default-column-width { proportion 1.0; }
+}
+
+window-rule {
+    match app-id="dev.radhey.VictusControl"
+    default-column-width { fixed 840; }
+    default-window-height { fixed 366; }
+}
+
+window-rule {
+    match app-id="cider"
+    default-column-width { proportion 0.7; }
+}
+
+window-rule {
+    match app-id="chrome-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
+    default-column-width { proportion 0.7; }
+}
+
+window-rule {
+    // This rule will match all windows with the app-id "org.gnome.Nautilus"
+    // and set their default column width to 0.5 of the output width.
+    match app-id="io.github.jR4dh3y.wallpygui"
+    open-floating true
+}
+
+window-rule {
+    match app-id="org.kde.dolphin"
+    opacity 0.88
+}
+
+window-rule {
+    match app-id="org.gnome.Nautilus"
+    opacity 0.88
+}
+
+// Open the Firefox picture-in-picture player as floating by default.
+window-rule {
+    // This app-id regular expression will work for both:
+    // - host Firefox (app-id is "firefox")
+    // - Flatpak Firefox (app-id is "org.mozilla.firefox")
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+
+window-rule {
+    exclude app-id="zen-browser"
+    exclude app-id="zen"
+    draw-border-with-background false
+    geometry-corner-radius 0
+    background-effect {
+        blur true
+    }
+    popups {
+        geometry-corner-radius 0
+        background-effect {
+            blur true
+            xray false
+        }
+    }
+}
+
+layer-rule {
+    match namespace="wayland-pet"
+    match layer="overlay"
+    background-effect {
+        blur false
+    }
+}
+
+layer-rule {
+    match namespace="waybar"
+    background-effect {
+        blur false
+    }
+}
+
+layer-rule {
+    match namespace="bar-niri"
+    background-effect {
+        blur false
+    }
+}
+
+// Nonchalant currently uses full-screen transparent layer surfaces to host its
+// bar, menus, and input regions. Blurring those surfaces blurs the whole
+// desktop, so keep the shell clear until its panels use separate surfaces.
+layer-rule {
+    match namespace=r#"^nonchalant(?::.*)?$"#
+    background-effect {
+        blur false
+    }
+}
+
+layer-rule {
+    match layer="top"
+    match layer="overlay"
+    exclude namespace="wayland-pet"
+    exclude namespace="waybar"
+    exclude namespace="bar-niri"
+    exclude namespace=r#"^nonchalant(?::.*)?$"#
+    background-effect {
+        blur true
+        xray false
+    }
+    popups {
+        background-effect {
+            blur true
+            xray false
+        }
+    }
+}
+
+// Bottom/background layers (wallpaper etc) keep efficient xray blur.
+layer-rule {
+    match layer="bottom"
+    match layer="background"
+    exclude namespace="waybar"
+    exclude namespace="bar-niri"
+    exclude namespace=r#"^nonchalant(?::.*)?$"#
+    background-effect {
+        blur true
+    }
+}
+
+window-rule {
+    match app-id="floating"
+    open-floating true
+    min-width 800
+    min-height 700
+    max-width 800
+    max-height 700
+    geometry-corner-radius 0
+    clip-to-geometry true
+}
+window-rule {
+    match app-id="project-picker"
+    open-floating true
+    min-width 500
+    min-height 390
+    max-width 500
+    max-height 390
+    geometry-corner-radius 0
+    clip-to-geometry true
+    background-effect {
+        blur true
+        xray false
+    }
+}
+window-rule {
+    match app-id="menu"
+    open-floating true
+    min-width 300
+    min-height 250
+    max-width 300
+    max-height 250
+    geometry-corner-radius 0
+    clip-to-geometry true
+}
+window-rule {
+    match app-id="port"
+    open-floating true
+    min-width 850
+    min-height 400
+    max-width 850
+    max-height 400
+    geometry-corner-radius 0
+    clip-to-geometry true
+}
+
+window-rule {
+    match app-id="kill"
+    open-floating true
+    min-width 700
+    min-height 500
+    max-width 700
+    max-height 500
+    geometry-corner-radius 0
+    clip-to-geometry true
+}
+
+// Wallpaper Engine creates a blank XWayland helper/tray window on niri.
+// Do not bridge it with xembedsniproxy: clicking that Wine tray icon can crash XWayland/Steam.
+window-rule {
+    match app-id="steam_app_431960" title="^$"
+    open-floating true
+    open-focused false
+    min-width 1
+    min-height 1
+    max-width 1
+    max-height 1
+    opacity 0.0
+    geometry-corner-radius 0
+    clip-to-geometry true
+}
+
+// Steam main window - fullscreen
+window-rule {
+    match app-id="steam" title="^Steam$"
+    open-floating false
+}
+
+// Steam Friends List - tiled with specific size
+window-rule {
+    match app-id="steam" title="^Friends List$"
+    open-floating false
+    min-width 378
+    max-width 378
+    min-height 1036
+    max-height 1036
+}
+window-rule {
+    match app-id="steam" title="^$"
+    open-floating true
+    min-width 814
+    max-width 814
+    min-height 765
+    max-height 765
+}
+
+// Workspace "web": Browser
+window-rule {
+    match app-id="zen-browser"
+    match app-id="zen"
+    open-on-workspace "web"
+    open-focused true
+}
+
+// Workspace "chat": WhatsApp Web, Steam
+window-rule {
+    match app-id="chrome-web.whatsapp.com__-Default"
+    match app-id="steam"
+    open-on-workspace "chat"
+    open-focused true
+}
+
+// Workspace "chat": Discord
+window-rule {
+    match app-id="discord"
+    open-on-workspace "chat"
+    open-focused true
+    default-column-width { fixed 1335; }
+    default-window-height { fixed 1036; }
+}
+
+// Workspace "media": Cider, OBS
+window-rule {
+    match app-id="Cider"
+    match app-id="com.obsproject.Studio"
+    open-on-workspace "media"
+    open-focused true
+}
+
+// Workspace "dev":
+window-rule {
+    match app-id="code"
+    match app-id="dev.zed.Zed"
+    match app-id="t3code"
+    open-on-workspace "dev"
+    open-focused true
+}
+
+binds {
+    // Keys consist of modifiers separated by + signs, followed by an XKB key name
+
+    // Waybar rice tools.
+    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    Mod+D hotkey-overlay-title="Open System Monitor" { spawn "kitty" "--class" "floating" "btop"; }
+    Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "rsclip" "show"; }
+    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "fuzzel"; }
+    Mod+C hotkey-overlay-title="Open Project" { spawn "/home/radhey/.local/bin/project-picker"; }
+    Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "/home/radhey/.local/bin/project-picker" "zed"; }
+    Mod+Grave hotkey-overlay-title="Open AI Assistant" { spawn "t3code"; }
+
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
+    Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
+    Mod+KP_1 hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
+    Mod+KP_2 hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
+    Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
+    Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
+    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "/home/radhey/.config/scripts/wlogout.sh"; }
+    Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
+    Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
+    Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
+    Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
+    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "swaylock"; }
+    Mod+Z hotkey-overlay-title="Reload Waybar" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" reload"; }
+    // Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
+    // Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
+
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "up"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "down"; }
+    XF86AudioMute         allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "mute"; }
+    XF86AudioMicMute      allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "mic-mute"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "/home/radhey/.config/scripts/brightness-notify.sh" "down"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "/home/radhey/.config/scripts/brightness-notify.sh" "up"; }
+
+    Mod+Tab repeat=false { toggle-overview; }
+
+    Mod+Shift+W hotkey-overlay-title="Open WallpyGUI" { spawn "wallpygui"; }
+
+    Mod+Q { close-window; }
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Down  { move-window-down; }
+    Mod+Ctrl+Up    { move-window-up; }
+    Mod+Ctrl+Right { move-column-right; }
+
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    Mod+Shift+Left  { focus-monitor-left; }
+    Mod+Shift+Down  { focus-monitor-down; }
+    Mod+Shift+Up    { focus-monitor-up; }
+    Mod+Shift+Right { focus-monitor-right; }
+
+
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+    Shift+Page_Down { spawn "sh" "-c" "/home/radhey/.config/scripts/scale-adjust.sh -0.05"; }
+    Shift+Page_Up   { spawn "sh" "-c" "/home/radhey/.config/scripts/scale-adjust.sh +0.05"; }
+
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+
+    // Switch to named workspaces directly with Mod+Number.
+    Mod+1 { focus-workspace "web"; }
+    Mod+2 { focus-workspace "dev"; }
+    Mod+3 { focus-workspace "chat"; }
+    Mod+4 { focus-workspace "media"; }
+    Mod+5 { focus-workspace "vm"; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Shift+1 { move-column-to-workspace "web"; }
+    Mod+Shift+2 { move-column-to-workspace "dev"; }
+    Mod+Shift+3 { move-column-to-workspace "chat"; }
+    Mod+Shift+4 { move-column-to-workspace "media"; }
+    Mod+Shift+5 { move-column-to-workspace "vm"; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    // Consume one window from the right to the bottom of the focused column.
+    Mod+Comma  { consume-window-into-column; }
+
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+
+    Mod+Ctrl+F { expand-column-to-available-width; }
+
+    Mod+Ctrl+C { center-visible-columns; }
+
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    Mod+G      { toggle-window-floating; }
+    Mod+Shift+G { switch-focus-between-floating-and-tiling; }
+
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+    Mod+Print hotkey-overlay-title="Copy Latest Screenshot Path" { spawn ".config/scripts/copy-latest-screenshot-path.sh"; }
+
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    Mod+Shift+E { quit; }
+
+    Mod+Shift+P { power-off-monitors; }
+}
