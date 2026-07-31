@@ -78,6 +78,25 @@ The installer auto-detects:
 - Switch your shell to fish (optional): `chsh -s /usr/bin/fish`
 - Change wallpaper: `wallpaper ~/.local/share/wallpapers/<file>`
 
+### Switching desktop rices
+
+The Niri config can run either the Waybar rice or the Nonchalant QuickShell
+rice. The selection persists across sessions:
+
+```bash
+rice status
+rice waybar
+rice quickshell
+rice toggle
+rice reload
+```
+
+QuickShell is the default. Its checkout is expected at
+`~/code/random/nshell/shell`; set `NONCHALANT_SHELL_PATH` if it lives elsewhere.
+The switcher keeps Waybar/Dunst and QuickShell from competing for the tray and
+notification D-Bus services, and Niri's launcher, lock, power, reload, audio,
+and brightness bindings follow the active rice.
+
 ## Troubleshooting
 
 - Pacman is locked: remove the stale DB lock: `sudo rm -f /var/lib/pacman/db.lck`

@@ -41,10 +41,6 @@ input {
 }
 
 debug {
-    // Keep niri rendering on the AMD iGPU so the NVIDIA dGPU can be
-    // switched between PRIME offload and VFIO passthrough.
-    render-drm-device "/dev/dri/by-path/pci-0000:06:00.0-render"
-
     // NVIDIA PRIME games cannot reliably direct-scan-out through the AMD
     // display GPU. Compositing them avoids the black frame with live audio.
     disable-direct-scanout
@@ -110,12 +106,9 @@ environment {
 //     path "~/.local/bin/xwayland-satellite-wallpaper"
 // }
 
-// Nonchalant Shell replaces waybar as the panel / bar / lock host.
-// spawn-at-startup "waybar"
-spawn-at-startup "qs" "-p" "/home/radhey/code/random/nshell/shell"
-// Shell owns org.freedesktop.Notifications (history + toast popups). Do not
-// start dunst alongside it or the bus name will fight for ownership.
-// spawn-at-startup "dunst"
+// Start the persisted Waybar or QuickShell rice. The rice helper also makes
+// sure that only the selected notification host owns the D-Bus name.
+spawn-at-startup "sh" "-c" "exec \"$HOME/.local/bin/rice\" start"
 spawn-at-startup "wl-gammarelay-rs"
 // Initialize GNOME Keyring for the Secret Service D-Bus API (org.freedesktop.secrets),
 // required by apps like Mailspring that use libsecret for credential storage.
@@ -383,9 +376,9 @@ window-rule {
     open-focused true
 }
 
-// Workspace "chat": WhatsApp, Steam
+// Workspace "chat": WhatsApp Web, Steam
 window-rule {
-    match app-id="chrome-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
+    match app-id="chrome-web.whatsapp.com__-Default"
     match app-id="steam"
     open-on-workspace "chat"
     open-focused true
@@ -417,52 +410,43 @@ window-rule {
     open-focused true
 }
 
-// Workspace "vm": virtual machines and guest consoles
-window-rule {
-    match app-id="virt-manager"
-    match app-id="remote-viewer"
-    match app-id="virt-viewer"
-    match app-id="looking-glass-client"
-    open-on-workspace "vm"
-    open-focused true
-}
-
-
-
 binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
 
-    // Nonchalant Shell IPC — launcher, lock, power, media OSD
-    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
-    Mod+D hotkey-overlay-title="Open Dashboard" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "system-monitor"; }
+    // Rice-aware actions dispatch to either Waybar's tools or Nonchalant IPC.
+    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action launcher"; }
+    Mod+D hotkey-overlay-title="Open Dashboard" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action dashboard"; }
     Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "rsclip" "show"; }
-    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
-    Mod+C hotkey-overlay-title="Open Project" { spawn "/home/radhey/.local/bin/project-picker"; }
+    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action launcher"; }
+    Mod+C hotkey-overlay-title="Open Project" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action project"; }
     Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "/home/radhey/.local/bin/project-picker" "zed"; }
+    Mod+Grave hotkey-overlay-title="Open AI Assistant" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action assistant"; }
 
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
+    Mod+KP_1 hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
+    Mod+KP_2 hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
-    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
+    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action powermenu"; }
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
-    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "lockscreen" "lock"; }
-    Mod+Z hotkey-overlay-title="Reload Nonchalant" { spawn "sh" "-c" "pkill -f 'qs -p /home/radhey/code/random/nshell/shell' || true; sleep 0.2; exec qs -p /home/radhey/code/random/nshell/shell"; }
-    Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
-    Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
+    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action lock"; }
+    Mod+Z hotkey-overlay-title="Reload Active Rice" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action reload"; }
+    // Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
+    // Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
 
-    // Route media keys through Nonchalant so the bar OSD updates.
-    XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "increment"; }
-    XF86AudioLowerVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "decrement"; }
-    XF86AudioMute         allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMute"; }
-    XF86AudioMicMute      allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMicMute"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "decrement"; }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "increment"; }
+    // Preserve the matching OSD behavior for the active rice.
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action volume-up"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action volume-down"; }
+    XF86AudioMute         allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action volume-mute"; }
+    XF86AudioMicMute      allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action mic-mute"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action brightness-down"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" action brightness-up"; }
 
     Mod+Tab repeat=false { toggle-overview; }
 
