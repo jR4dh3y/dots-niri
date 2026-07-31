@@ -32,14 +32,6 @@ fi
 driver="$(driver_for_gpu)"
 
 case "$driver" in
-    vfio-pci)
-        if command -v virsh >/dev/null 2>&1 && virsh -c qemu:///system domstate win10-rtx3050 2>/dev/null | grep -Eq 'running|paused'; then
-            json "VM" "RTX GPU is passed through to win10-rtx3050" "vfio"
-        else
-            json "VFIO" "RTX GPU is bound to vfio-pci and ready for the Windows VM" "vfio"
-        fi
-        exit 0
-        ;;
     none)
         json "OFF" "RTX GPU is not bound to a Linux driver" "off"
         exit 0

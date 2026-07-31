@@ -137,90 +137,13 @@ install_nm_iwd_config() {
 	$SUDO_CMD install -Dm644 "$src" "$dest"
 }
 
-install_gpu_switch_config() {
-	local helper_dir="$INSTALL_DIR/gpu-switch/usr-local-sbin"
-	local udev_rule="$INSTALL_DIR/gpu-switch/udev/90-nvidia-no-seat.rules"
-	local libvirt_hook="$INSTALL_DIR/gpu-switch/libvirt-hooks/qemu"
-	local modprobe_dir="$INSTALL_DIR/gpu-switch/modprobe"
-	local modules_load_dir="$INSTALL_DIR/gpu-switch/modules-load"
-	local helper
-	local config
+install_nvidia_config() {
+	local src="$INSTALL_DIR/nvidia/modprobe/nvidia.conf"
 
-	if [[ -d "$helper_dir" ]]; then
-		msg "Syncing GPU switch helpers"
-		for helper in "$helper_dir"/*; do
-			[[ -f "$helper" ]] || continue
-			$SUDO_CMD install -Dm755 "$helper" "/usr/local/sbin/$(basename "$helper")"
-		done
+	if [[ -f "$src" ]]; then
+		msg "Syncing NVIDIA module configuration"
+		$SUDO_CMD install -Dm644 "$src" /etc/modprobe.d/nvidia.conf
 	fi
-
-	if [[ -f "$libvirt_hook" ]]; then
-		msg "Syncing libvirt GPU/guest-disk hook"
-		$SUDO_CMD install -Dm755 "$libvirt_hook" /etc/libvirt/hooks/qemu
-	fi
-
-	if [[ -d "$modprobe_dir" ]]; then
-		msg "Syncing GPU driver module configuration"
-		for config in "$modprobe_dir"/*.conf; do
-			[[ -f "$config" ]] || continue
-			$SUDO_CMD install -Dm644 "$config" "/etc/modprobe.d/$(basename "$config")"
-		done
-	fi
-
-	if [[ -d "$modules_load_dir" ]]; then
-		for config in "$modules_load_dir"/*.conf; do
-			[[ -f "$config" ]] || continue
-			$SUDO_CMD install -Dm644 "$config" "/etc/modules-load.d/$(basename "$config")"
-		done
-	fi
-
-	if [[ -f "$udev_rule" ]]; then
-		msg "Syncing NVIDIA no-seat udev rule"
-		$SUDO_CMD install -Dm644 "$udev_rule" /etc/udev/rules.d/90-nvidia-no-seat.rules
-		$SUDO_CMD udevadm control --reload-rules || true
-		$SUDO_CMD udevadm trigger --subsystem-match=drm --action=change || true
-	fi
-}
-
-install_looking_glass_config() {
-	local tmpfiles_conf="$INSTALL_DIR/looking-glass/tmpfiles/looking-glass.conf"
-
-	if [[ -f "$tmpfiles_conf" ]]; then
-		msg "Syncing Looking Glass shared-memory config"
-		$SUDO_CMD install -Dm644 "$tmpfiles_conf" /etc/tmpfiles.d/looking-glass.conf
-		$SUDO_CMD systemd-tmpfiles --create /etc/tmpfiles.d/looking-glass.conf || true
-	fi
-}
-
-ensure_ufw_rule() {
-	local match="$1"
-	shift
-
-	if ! command -v ufw >/dev/null 2>&1; then
-		warn "Skipping UFW rule; ufw is not installed"
-		return
-	fi
-
-	if $SUDO_CMD ufw status | grep -Fq "$match"; then
-		msg "UFW rule already present: $match"
-		return
-	fi
-
-	$SUDO_CMD ufw "$@"
-}
-
-install_vm_network_config() {
-	if command -v virsh >/dev/null 2>&1 && virsh -c qemu:///system net-info default >/dev/null 2>&1; then
-		msg "Ensuring libvirt DHCP reservation for win10-rtx3050"
-		virsh -c qemu:///system net-update default add ip-dhcp-host \
-			'<host mac="52:54:00:1a:cd:bd" name="win10-rtx3050" ip="192.168.122.50"/>' \
-			--live --config >/dev/null 2>&1 || true
-	fi
-
-	msg "Ensuring UFW allows libvirt DNS/DHCP on virbr0"
-	ensure_ufw_rule "192.168.122.1 53/udp on virbr0" allow in on virbr0 from 192.168.122.0/24 to 192.168.122.1 proto udp port 53
-	ensure_ufw_rule "192.168.122.1 53/tcp on virbr0" allow in on virbr0 from 192.168.122.0/24 to 192.168.122.1 proto tcp port 53
-	ensure_ufw_rule "67/udp on virbr0" allow in on virbr0 proto udp to any port 67
 }
 
 print_post_upgrade_notes() {
@@ -244,9 +167,7 @@ main() {
 	apply_desktop_theme
 	install_ly_config
 	install_nm_iwd_config
-	install_gpu_switch_config
-	install_looking_glass_config
-	install_vm_network_config
+	install_nvidia_config
 	print_post_upgrade_notes
 }
 

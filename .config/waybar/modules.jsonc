@@ -98,18 +98,6 @@
       "spacing": 8
    },
 
-   "custom/gpu-switch": {
-      "exec": "$HOME/.config/scripts/waybar-gpu-switch.sh status",
-      "return-type": "json",
-      "interval": 5,
-      "signal": 9,
-      "format": "{}",
-      "tooltip": true,
-      "on-click": "$HOME/.config/scripts/waybar-gpu-switch.sh menu",
-      "on-click-right": "$HOME/.config/scripts/waybar-gpu-switch.sh to-linux",
-      "on-click-middle": "$HOME/.config/scripts/waybar-gpu-switch.sh toggle-vm"
-   },
-
    "group/status-group": {
       "orientation": "inherit",
       "modules": [

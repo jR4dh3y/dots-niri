@@ -129,7 +129,6 @@ window#waybar > box {
 #custom-weather,
 #network,
 #privacy,
-#custom-gpu-switch,
 #tray {
     border-radius: 7px;
     margin: 2px;
@@ -221,26 +220,6 @@ window#waybar > box {
 
 #tray {
     background-color: #2a2a2c;
-}
-
-#custom-gpu-switch {
-    color: @middle_right_color;
-}
-
-#custom-gpu-switch.prime {
-    color: @highlight_color;
-}
-
-#custom-gpu-switch.vfio {
-    color: @first_right_color;
-}
-
-#custom-gpu-switch.vm-running {
-    color: @caution_color;
-}
-
-#custom-gpu-switch.unknown {
-    color: @urgent_color;
 }
 
 #power-profiles-daemon.performance {
