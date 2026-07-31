@@ -229,23 +229,12 @@ layer-rule {
     }
 }
 
-// Nonchalant currently uses full-screen transparent layer surfaces to host its
-// bar, menus, and input regions. Blurring those surfaces blurs the whole
-// desktop, so keep the shell clear until its panels use separate surfaces.
-layer-rule {
-    match namespace=r#"^nonchalant(?::.*)?$"#
-    background-effect {
-        blur false
-    }
-}
-
 layer-rule {
     match layer="top"
     match layer="overlay"
     exclude namespace="wayland-pet"
     exclude namespace="waybar"
     exclude namespace="bar-niri"
-    exclude namespace=r#"^nonchalant(?::.*)?$"#
     background-effect {
         blur true
         xray false
@@ -264,7 +253,6 @@ layer-rule {
     match layer="background"
     exclude namespace="waybar"
     exclude namespace="bar-niri"
-    exclude namespace=r#"^nonchalant(?::.*)?$"#
     background-effect {
         blur true
     }
@@ -433,9 +421,9 @@ binds {
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
     Mod+L hotkey-overlay-title="Lock Desktop" { spawn "swaylock"; }
-    Mod+Z hotkey-overlay-title="Reload Waybar" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" reload"; }
-    // Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
-    // Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
+    Mod+Z hotkey-overlay-title="Toggle Waybar" { spawn "pkill" "-SIGUSR1" "waybar"; }
+    Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
+    Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
 
     XF86AudioRaiseVolume  allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "up"; }
     XF86AudioLowerVolume  allow-when-locked=true { spawn "/home/radhey/.config/scripts/volume-notify.sh" "down"; }

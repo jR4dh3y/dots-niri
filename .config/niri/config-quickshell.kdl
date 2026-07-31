@@ -215,20 +215,6 @@ layer-rule {
     }
 }
 
-layer-rule {
-    match namespace="waybar"
-    background-effect {
-        blur false
-    }
-}
-
-layer-rule {
-    match namespace="bar-niri"
-    background-effect {
-        blur false
-    }
-}
-
 // Nonchalant currently uses full-screen transparent layer surfaces to host its
 // bar, menus, and input regions. Blurring those surfaces blurs the whole
 // desktop, so keep the shell clear until its panels use separate surfaces.
@@ -243,8 +229,6 @@ layer-rule {
     match layer="top"
     match layer="overlay"
     exclude namespace="wayland-pet"
-    exclude namespace="waybar"
-    exclude namespace="bar-niri"
     exclude namespace=r#"^nonchalant(?::.*)?$"#
     background-effect {
         blur true
@@ -262,8 +246,6 @@ layer-rule {
 layer-rule {
     match layer="bottom"
     match layer="background"
-    exclude namespace="waybar"
-    exclude namespace="bar-niri"
     exclude namespace=r#"^nonchalant(?::.*)?$"#
     background-effect {
         blur true

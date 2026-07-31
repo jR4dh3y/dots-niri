@@ -99,6 +99,19 @@ Waybar profile starts `awww` and binds `Mod+Shift+W` to WallpyGUI. The
 QuickShell profile stops `awww`, leaves that binding unused, and relies on the
 wallpaper manager in the QuickShell dashboard (`Mod+D`).
 
+| Binding | Waybar profile | QuickShell profile |
+| --- | --- | --- |
+| `Mod+A`, `Mod+Period` | Fuzzel | Nonchalant launcher |
+| `Mod+D` | `btop` in Kitty | Nonchalant dashboard |
+| `Mod+C` | Project Picker | Nonchalant projects |
+| `Mod+Grave` | T3 Code | Nonchalant assistant |
+| `Mod+X` | Wlogout | Nonchalant power menu |
+| `Mod+L` | Swaylock | Nonchalant lock screen |
+| `Mod+Z` | Toggle Waybar | Reload QuickShell |
+| `Mod+Shift+W` | WallpyGUI | Managed in dashboard |
+| `Mod+Space`, `Alt+Space` | Local/cloud transcription | Unbound |
+| Media and brightness keys | System commands with Dunst OSD | Nonchalant OSD |
+
 ## Troubleshooting
 
 - Pacman is locked: remove the stale DB lock: `sudo rm -f /var/lib/pacman/db.lck`
