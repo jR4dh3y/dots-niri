@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec /usr/bin/t3code --password-store=gnome-libsecret "$@"

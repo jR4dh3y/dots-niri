@@ -78,6 +78,44 @@ The installer auto-detects:
 - Switch your shell to fish (optional): `chsh -s /usr/bin/fish`
 - Change wallpaper: `wallpaper ~/.local/share/wallpapers/<file>`
 
+### Switching desktop rices
+
+Niri has separate `config-waybar.kdl` and `config-quickshell.kdl` profiles. The
+small `config.kdl` bootstrap loads the persisted selection at login:
+
+```bash
+rice status
+rice waybar
+rice quickshell
+rice toggle
+rice reload
+```
+
+QuickShell is the default. Its checkout is expected at
+`~/code/random/nshell/shell`; set `NONCHALANT_SHELL_PATH` if it lives elsewhere.
+The switcher loads the matching Niri profile and keeps Waybar/Dunst and
+QuickShell from competing for the tray and notification D-Bus services. The
+Waybar profile starts `awww` and binds `Mod+Shift+W` to WallpyGUI. The
+QuickShell profile stops `awww` and binds `Mod+Shift+W` to the Nonchalant wallpaper
+picker via IPC; `Mod+D` remains the system-usage dashboard.
+
+| Binding | Waybar profile | QuickShell profile |
+| --- | --- | --- |
+| `Mod+A`, `Mod+Period` | Fuzzel | Nonchalant launcher |
+| `Mod+D` | `btop` in Kitty | Nonchalant dashboard |
+| `Mod+C` | Project Picker | Nonchalant projects |
+| `Mod+Grave` | T3 Code | Nonchalant assistant |
+| `Mod+X` | Wlogout | Nonchalant power menu |
+| `Mod+L` | Swaylock | Nonchalant lock screen |
+| `Mod+Z` | Toggle Waybar | Reload QuickShell |
+| `Mod+Shift+W` | WallpyGUI | Nonchalant wallpapers |
+| `Mod+Space`, `Alt+Space` | Local/cloud transcription | Unbound |
+| Media and brightness keys | System commands with Dunst OSD | Nonchalant OSD |
+
+Only the five named workspaces are bound (`web`, `dev`, `chat`, `media`, and
+`vm`). Niri still keeps one empty dynamic workspace, but it will no longer
+create the extra numbered 6–9 workspaces from these profiles.
+
 ## Troubleshooting
 
 - Pacman is locked: remove the stale DB lock: `sudo rm -f /var/lib/pacman/db.lck`

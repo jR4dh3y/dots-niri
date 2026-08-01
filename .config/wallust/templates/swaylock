@@ -1,0 +1,55 @@
+daemonize
+ignore-empty-password
+show-failed-attempts
+grace=2
+grace-no-mouse
+grace-no-touch
+
+image={{wallpaper}}
+scaling=fill
+effect-blur=8x3
+effect-vignette=0.35:0.35
+fade-in=0.2
+
+clock
+timestr=%H:%M:%S
+datestr=%A · %d %B
+indicator
+indicator-idle-visible
+indicator-caps-lock
+indicator-radius=230
+indicator-thickness=6
+indicator-x-position=960
+indicator-y-position=430
+
+font=JetBrainsMono Nerd Font
+font-size=28
+inside-color={{color0 | strip}}bb
+inside-clear-color={{color0 | strip}}bb
+inside-caps-lock-color={{color0 | strip}}bb
+inside-ver-color={{color0 | strip}}bb
+inside-wrong-color={{color0 | strip}}bb
+ring-color={{color4 | strip}}ff
+ring-clear-color={{color4 | strip}}ff
+ring-caps-lock-color={{color3 | strip}}ff
+ring-ver-color={{color2 | strip}}ff
+ring-wrong-color={{color1 | strip}}ff
+key-hl-color={{color2 | strip}}ff
+bs-hl-color={{color1 | strip}}ff
+caps-lock-key-hl-color={{color3 | strip}}ff
+caps-lock-bs-hl-color={{color1 | strip}}ff
+line-color=00000000
+line-clear-color=00000000
+line-caps-lock-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+separator-color=00000000
+text-color={{color7 | strip}}ff
+text-clear-color={{color7 | strip}}ff
+text-caps-lock-color={{color3 | strip}}ff
+text-ver-color={{color2 | strip}}ff
+text-wrong-color={{color1 | strip}}ff
+text-clear=Cleared
+text-caps-lock=Caps Lock
+text-ver=Checking...
+text-wrong=Wrong password

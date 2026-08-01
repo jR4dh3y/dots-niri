@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=X
+Exec=/home/radhey/.config/scripts/browser-app https://x.com/
+Icon=/home/radhey/.local/share/applications/icons/x.svg
+StartupWMClass=chrome-x.com__-Default

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Reddit
+Exec=/home/radhey/.config/scripts/browser-app https://www.reddit.com/
+Icon=/home/radhey/.local/share/applications/icons/reddit.svg
+StartupWMClass=chrome-www.reddit.com__-Default

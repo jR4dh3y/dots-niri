@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+browser=$(xdg-settings get default-web-browser)
+
+case $browser in
+	google-chrome* | brave-* | microsoft-edge* | opera* | vivaldi* | helium-browser*) ;;
+	*) browser="helium.desktop" ;;
+esac
+
+executable=$(
+	sed -n 's/^Exec=\([^ ]*\).*/\1/p' \
+		"$HOME/.local/share/applications/$browser" \
+		"$HOME/.nix-profile/share/applications/$browser" \
+		"/usr/share/applications/$browser" \
+		2>/dev/null |
+		head -1
+)
+
+[[ -n $executable ]] || exit 1
+
+exec "$executable" --app="$1" "${@:2}" >/dev/null 2>&1

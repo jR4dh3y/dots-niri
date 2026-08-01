@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WhatsApp Web
+Exec=/home/radhey/.config/scripts/browser-app https://web.whatsapp.com/
+Icon=/home/radhey/.local/share/applications/icons/whatsapp.svg
+StartupWMClass=chrome-web.whatsapp.com__-Default

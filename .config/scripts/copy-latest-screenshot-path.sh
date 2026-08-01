@@ -7,7 +7,7 @@ if [ ! -d "$SCREENSHOT_DIR" ]; then
     exit 1
 fi
 
-# Get the most recently modified file (handles both niri and grimblast naming)
+# Get the most recently modified screenshot.
 LATEST=$(ls -t "$SCREENSHOT_DIR" | head -n 1)
 
 if [ -z "$LATEST" ]; then

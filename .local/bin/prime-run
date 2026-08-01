@@ -1,0 +1,12 @@
+#!/bin/sh
+# Override nvidia-prime for sessions that pin ordinary applications to AMD.
+# NVIDIA-only Vulkan launches do not need Mesa's device-selection layer.
+
+unset DRI_PRIME
+
+NODEVICE_SELECT=1 \
+__NV_PRIME_RENDER_OFFLOAD=1 \
+__GLX_VENDOR_LIBRARY_NAME=nvidia \
+__VK_LAYER_NV_optimus=NVIDIA_only \
+VK_LOADER_DRIVERS_SELECT='*nvidia*' \
+exec "$@"

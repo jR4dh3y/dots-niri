@@ -46,11 +46,11 @@ def generate_thumbnail(video):
     return thumb_path
 
 
-def use_swww(img_path, resize):
+def use_awww(img_path, resize):
     subprocess.run(["pkill", "mpvpaper"])
     no_stdout(
         [
-            "swww",
+            "awww",
             "img",
             "--filter",
             "Lanczos3",
@@ -68,9 +68,10 @@ def use_swww(img_path, resize):
 def use_mpv(img_path):
     import json
 
-    outputs = json.loads(subprocess.check_output(["hyprctl", "monitors", "-j"]))
-    width = min(output["width"] for output in outputs)
-    height = min(output["height"] for output in outputs)
+    outputs = json.loads(subprocess.check_output(["niri", "msg", "--json", "outputs"]))
+    active_outputs = list(outputs.values())
+    width = min(output["logical"]["width"] for output in active_outputs)
+    height = min(output["logical"]["height"] for output in active_outputs)
 
     result = subprocess.check_output(
         [
@@ -106,7 +107,7 @@ def use_mpv(img_path):
     else:
         video = img_path
 
-    for output in outputs:
+    for output in active_outputs:
         no_stdout(["mpvpaper", "-s", "-o", "no-audio loop", output["name"], video])
 
 
@@ -150,7 +151,7 @@ def main():
 
     if file_type.startswith("image/"):
         generate_colors(img_path)
-        use_swww(img_path, resize)
+        use_awww(img_path, resize)
     elif file_type.startswith("video/"):
         thumb = generate_thumbnail(img_path)
         generate_colors(thumb)
@@ -158,8 +159,6 @@ def main():
     else:
         print(f"Unsupported file type: {file_type}")
         sys.exit(1)
-
-    no_stdout(["hyprctl", "reload"])
 
     subprocess.run(["colorscheme", img_path])
 

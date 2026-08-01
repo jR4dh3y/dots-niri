@@ -1,0 +1,13 @@
+[Module-networkmanagement]
+autoload=false
+load-on-demand=false
+
+[Module-plasmanetworkmanagement]
+autoload=false
+load-on-demand=false
+
+# Blueman owns the Bluetooth and OBEX agents in the Niri session. Keep KDED
+# for Dolphin/KIO integration, but prevent its Bluedevil module from competing.
+[Module-bluedevil]
+autoload=false
+load-on-demand=false

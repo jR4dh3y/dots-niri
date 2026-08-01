@@ -18,13 +18,13 @@
 }
 {
     "label" : "hibernate",
-    "action" : "hyprlock && systemctl hibernate",
+    "action" : "swaylock --daemonize && systemctl hibernate",
     "text" : "Hibernate",
     "keybind" : "h"
 }
 {
     "label" : "lock",
-    "action" : "hyprlock",
+    "action" : "swaylock",
     "text" : "Lock",
     "keybind" : "l"
 }

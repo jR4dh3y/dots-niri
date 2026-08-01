@@ -1,0 +1,382 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly DEFAULT_RICE="quickshell"
+readonly CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+readonly STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+readonly STATE_DIR="$STATE_HOME/dots-niri"
+readonly STATE_FILE="$STATE_DIR/rice"
+readonly LOG_DIR="$STATE_DIR/log"
+readonly QUICKSHELL_DIR="${NONCHALANT_SHELL_PATH:-$HOME/code/random/nshell/shell}"
+readonly NIRI_CONFIG_DIR="$CONFIG_HOME/niri"
+
+usage() {
+	cat <<'EOF'
+Usage: rice [waybar|quickshell|toggle|reload|status|start]
+
+Switch between the Waybar and QuickShell desktop rices. The selected rice is
+remembered across Niri sessions. With no argument, the current status is shown.
+
+EOF
+}
+
+read_rice() {
+	local selected
+
+	if [[ -r "$STATE_FILE" ]]; then
+		read -r selected < "$STATE_FILE" || true
+	fi
+
+	case "${selected:-}" in
+		waybar|quickshell) printf '%s\n' "$selected" ;;
+		*) printf '%s\n' "$DEFAULT_RICE" ;;
+	esac
+}
+
+write_rice() {
+	local selected="$1"
+	local temporary
+
+	mkdir -p "$STATE_DIR"
+	temporary=$(mktemp "$STATE_DIR/rice.XXXXXX")
+	printf '%s\n' "$selected" > "$temporary"
+	mv -f "$temporary" "$STATE_FILE"
+}
+
+quickshell_pids() {
+	local pid command_line
+
+	while read -r pid; do
+		[[ -r "/proc/$pid/cmdline" ]] || continue
+		command_line=$(tr '\0' ' ' < "/proc/$pid/cmdline")
+		if [[ "$command_line" == *"qs -p $QUICKSHELL_DIR"* ]]; then
+			printf '%s\n' "$pid"
+		fi
+	done < <(pgrep -x qs 2>/dev/null || true)
+}
+
+quickshell_running() {
+	[[ -n "$(quickshell_pids)" ]]
+}
+
+process_running() {
+	pgrep -x "$1" >/dev/null 2>&1
+}
+
+wait_for_process_to_stop() {
+	local process="$1"
+	local attempt
+
+	for attempt in {1..40}; do
+		if ! process_running "$process"; then
+			return 0
+		fi
+		sleep 0.05
+	done
+	return 1
+}
+
+wait_for_quickshell_to_stop() {
+	local attempt
+
+	for attempt in {1..40}; do
+		if ! quickshell_running; then
+			return 0
+		fi
+		sleep 0.05
+	done
+	return 1
+}
+
+stop_quickshell() {
+	local pid
+
+	while read -r pid; do
+		[[ -n "$pid" ]] && kill "$pid" 2>/dev/null || true
+	done < <(quickshell_pids)
+	wait_for_quickshell_to_stop || true
+}
+
+stop_process() {
+	local process="$1"
+
+	pkill -x "$process" 2>/dev/null || true
+	wait_for_process_to_stop "$process" || true
+}
+
+start_detached() {
+	local log_name="$1"
+	shift
+
+	mkdir -p "$LOG_DIR"
+	setsid -f "$@" >> "$LOG_DIR/$log_name.log" 2>&1
+}
+
+wait_for_process_to_start() {
+	local process="$1"
+	local attempt
+
+	for attempt in {1..40}; do
+		if process_running "$process"; then
+			return 0
+		fi
+		sleep 0.05
+	done
+	return 1
+}
+
+wait_for_quickshell_to_start() {
+	local attempt
+
+	for attempt in {1..40}; do
+		if quickshell_running; then
+			return 0
+		fi
+		sleep 0.05
+	done
+	return 1
+}
+
+check_quickshell() {
+	command -v qs >/dev/null 2>&1 || {
+		printf 'rice: qs is not installed or is not in PATH\n' >&2
+		return 1
+	}
+	[[ -d "$QUICKSHELL_DIR" ]] || {
+		printf 'rice: Nonchalant shell directory not found: %s\n' "$QUICKSHELL_DIR" >&2
+		printf 'Set NONCHALANT_SHELL_PATH to use a different checkout.\n' >&2
+		return 1
+	}
+}
+
+check_waybar() {
+	local command
+
+	for command in waybar dunst awww-daemon; do
+		command -v "$command" >/dev/null 2>&1 || {
+			printf 'rice: %s is not installed or is not in PATH\n' "$command" >&2
+			return 1
+		}
+	done
+}
+
+profile_path() {
+	printf '%s/config-%s.kdl\n' "$NIRI_CONFIG_DIR" "$1"
+}
+
+validate_profile() {
+	local target="$1"
+	local profile
+
+	profile=$(profile_path "$target")
+	[[ -r "$profile" ]] || {
+		printf 'rice: Niri profile not found: %s\n' "$profile" >&2
+		return 1
+	}
+	command -v niri >/dev/null 2>&1 || {
+		printf 'rice: niri is not installed or is not in PATH\n' >&2
+		return 1
+	}
+	niri validate --config "$profile" >/dev/null
+}
+
+load_profile() {
+	local target="$1"
+	local profile
+
+	profile=$(readlink -f "$(profile_path "$target")")
+	niri msg action load-config-file --path "$profile" >/dev/null
+}
+
+start_quickshell() {
+	check_quickshell || return 1
+	quickshell_running && return 0
+	start_detached quickshell qs -p "$QUICKSHELL_DIR"
+	wait_for_quickshell_to_start || {
+		printf 'rice: QuickShell failed to start; see %s/quickshell.log\n' "$LOG_DIR" >&2
+		return 1
+	}
+}
+
+start_kded() {
+	command -v kded6 >/dev/null 2>&1 || return 0
+	process_running kded6 || start_detached kded6 kded6
+}
+
+stop_awww() {
+	if process_running awww-daemon && command -v awww >/dev/null 2>&1; then
+		awww kill >/dev/null 2>&1 || true
+	fi
+	stop_process awww-daemon
+}
+
+start_awww() {
+	process_running awww-daemon && return 0
+	start_detached awww awww-daemon
+	wait_for_process_to_start awww-daemon || {
+		printf 'rice: awww failed to start; see %s/awww.log\n' "$LOG_DIR" >&2
+		return 1
+	}
+	awww restore >/dev/null 2>&1 || true
+}
+
+start_waybar() {
+	check_waybar || return 1
+
+	# Waybar must claim StatusNotifierWatcher before kded6 for its tray to work.
+	stop_process kded6
+	process_running dunst || start_detached dunst dunst
+	wait_for_process_to_start dunst || {
+		printf 'rice: dunst failed to start; see %s/dunst.log\n' "$LOG_DIR" >&2
+		start_kded
+		return 1
+	}
+	process_running waybar || start_detached waybar waybar
+	wait_for_process_to_start waybar || {
+		printf 'rice: Waybar failed to start; see %s/waybar.log\n' "$LOG_DIR" >&2
+		start_kded
+		return 1
+	}
+	start_awww || {
+		start_kded
+		return 1
+	}
+	start_kded
+}
+
+restore_profile() {
+	local previous="$1"
+
+	case "$previous" in
+		quickshell)
+			stop_process waybar
+			stop_process dunst
+			stop_awww
+			load_profile quickshell || true
+			start_quickshell || true
+			;;
+		waybar)
+			stop_quickshell
+			stop_process kded6
+			load_profile waybar || true
+			start_waybar || true
+			;;
+	esac
+}
+
+activate() {
+	local target="$1"
+	local previous
+
+	case "$target" in
+		quickshell)
+			check_quickshell || return 1
+			validate_profile quickshell || return 1
+			;;
+		waybar)
+			check_waybar || return 1
+			validate_profile waybar || return 1
+			;;
+		*) printf 'rice: unknown rice: %s\n' "$target" >&2; return 2 ;;
+	esac
+
+	previous=$(read_rice)
+	case "$target" in
+		quickshell)
+			stop_process waybar
+			stop_process dunst
+			stop_awww
+			if ! load_profile quickshell; then
+				restore_profile "$previous"
+				return 1
+			fi
+			if ! start_quickshell; then
+				restore_profile "$previous"
+				return 1
+			fi
+			;;
+		waybar)
+			stop_quickshell
+			stop_process kded6
+			if ! load_profile waybar; then
+				restore_profile "$previous"
+				return 1
+			fi
+			if ! start_waybar; then
+				restore_profile "$previous"
+				return 1
+			fi
+			;;
+	esac
+
+	write_rice "$target"
+	printf 'Active rice: %s\n' "$target"
+}
+
+show_status() {
+	local selected
+	local waybar_state="stopped"
+	local quickshell_state="stopped"
+	local dunst_state="stopped"
+	local awww_state="stopped"
+
+	selected=$(read_rice)
+	process_running waybar && waybar_state="running"
+	quickshell_running && quickshell_state="running"
+	process_running dunst && dunst_state="running"
+	process_running awww-daemon && awww_state="running"
+
+	printf 'Selected:   %s\n' "$selected"
+	printf 'Waybar:     %s\n' "$waybar_state"
+	printf 'QuickShell: %s\n' "$quickshell_state"
+	printf 'Dunst:      %s\n' "$dunst_state"
+	printf 'Awww:       %s\n' "$awww_state"
+}
+
+main() {
+	local command="${1:-status}"
+	local selected
+
+	case "$command" in
+		waybar|quickshell|toggle|reload|start)
+			if [[ "${RICE_SWITCH_LOCKED:-0}" != "1" ]]; then
+				mkdir -p "$STATE_DIR"
+				exec flock --close "$STATE_DIR/switch.lock" \
+					env RICE_SWITCH_LOCKED=1 "$0" "$@"
+			fi
+			;;
+	esac
+
+	case "$command" in
+		waybar|quickshell) activate "$command" ;;
+		toggle)
+			selected=$(read_rice)
+			if [[ "$selected" == "quickshell" ]]; then
+				activate waybar
+			else
+				activate quickshell
+			fi
+			;;
+		reload)
+			selected=$(read_rice)
+			if [[ "$selected" == "quickshell" ]]; then
+				stop_quickshell
+				load_profile quickshell
+				start_quickshell
+				printf 'Reloaded rice: quickshell\n'
+			elif process_running waybar; then
+				load_profile waybar
+				pkill -SIGUSR2 -x waybar
+				printf 'Reloaded rice: waybar\n'
+			else
+				activate waybar
+			fi
+			;;
+		status) show_status ;;
+		start) activate "$(read_rice)" ;;
+		-h|--help|help) usage ;;
+		*) usage >&2; return 2 ;;
+	esac
+}
+
+main "$@"

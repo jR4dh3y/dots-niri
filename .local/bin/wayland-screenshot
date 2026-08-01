@@ -1,33 +1,55 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+SCREENSHOT_DIR="${HOME}/Pictures/Screenshots"
+MODE="${1:-screen}"
+STAMP=$(date '+%Y-%m-%d %H%M%S')
+OUTPUT="${SCREENSHOT_DIR}/Screenshot ${STAMP}.png"
+TEMP=$(mktemp --suffix=.png)
+trap 'rm -f "$TEMP"' EXIT
 
-SLURP_ARGS=
+mkdir -p "$SCREENSHOT_DIR"
 
-if [ ! -d "$SCREENSHOT_DIR" ]; then
-	mkdir -p "$SCREENSHOT_DIR"
-fi
+capture() {
+    local target=$1
+    local geometry output
 
-mode=$1
+    case "$MODE" in
+        screen)
+            grim "$target"
+            ;;
+        area|ocr|edit)
+            geometry=$(slurp) || exit 0
+            grim -g "$geometry" "$target"
+            ;;
+        output)
+            output=$(slurp -o -f '%o') || exit 0
+            grim -o "$output" "$target"
+            ;;
+        *)
+            printf 'Usage: %s [screen|area|output|edit|ocr]\n' "$0" >&2
+            exit 2
+            ;;
+    esac
+}
 
-if [ -z "$mode"   ]; then
-	mode="screen"
-fi
-
-if [ "$mode" == "ocr"  ]; then
-	grimblast --freeze save area "/tmp/$(whoami)-snip.png"
-	tesseract -l enf "/tmp/$(whoami)-snip.png" - | wl-copy
-	rm "/tmp/$(whoami)-snip.png"
-
-	exit 0
-fi
-
-if [ "$mode" == "edit" ]; then
-	GRIMBLAST_EDITOR="swappy -f" grimblast --freeze edit area 
-	exit 0
-fi
-
-PICNAME="Screenshot $(date '+%Y-%m-%d %H%M%S').png"
-PICPATH="$SCREENSHOT_DIR/$PICNAME"
-
-grimblast --notify copysave $mode "$PICPATH"
+case "$MODE" in
+    ocr)
+        capture "$TEMP"
+        tesseract -l eng "$TEMP" stdout | wl-copy
+        notify-send "Text copied" "OCR result is on the clipboard."
+        ;;
+    edit)
+        capture "$TEMP"
+        satty \
+            --filename "$TEMP" \
+            --output-filename "$OUTPUT" \
+            --copy-command wl-copy \
+            --early-exit all
+        ;;
+    *)
+        capture "$OUTPUT"
+        wl-copy --type image/png < "$OUTPUT"
+        notify-send "Screenshot saved" "$OUTPUT"
+        ;;
+esac
