@@ -96,8 +96,8 @@ QuickShell is the default. Its checkout is expected at
 The switcher loads the matching Niri profile and keeps Waybar/Dunst and
 QuickShell from competing for the tray and notification D-Bus services. The
 Waybar profile starts `awww` and binds `Mod+Shift+W` to WallpyGUI. The
-QuickShell profile stops `awww`, leaves that binding unused, and relies on the
-wallpaper manager in the QuickShell dashboard (`Mod+D`).
+QuickShell profile stops `awww` and binds `Mod+Shift+W` to the Nonchalant wallpaper
+picker via IPC; `Mod+D` remains the system-usage dashboard.
 
 | Binding | Waybar profile | QuickShell profile |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ wallpaper manager in the QuickShell dashboard (`Mod+D`).
 | `Mod+X` | Wlogout | Nonchalant power menu |
 | `Mod+L` | Swaylock | Nonchalant lock screen |
 | `Mod+Z` | Toggle Waybar | Reload QuickShell |
-| `Mod+Shift+W` | WallpyGUI | Managed in dashboard |
+| `Mod+Shift+W` | WallpyGUI | Nonchalant wallpapers |
 | `Mod+Space`, `Alt+Space` | Local/cloud transcription | Unbound |
 | Media and brightness keys | System commands with Dunst OSD | Nonchalant OSD |
 

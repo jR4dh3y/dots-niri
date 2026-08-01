@@ -405,8 +405,11 @@ binds {
 
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
+    // Keypad 1/2 are reported as KP_End/KP_Down when Num Lock is off.
     Mod+KP_1 hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
+    Mod+KP_End hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
     Mod+KP_2 hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
+    Mod+KP_Down hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
     Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
     Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
@@ -429,7 +432,7 @@ binds {
 
     Mod+Tab repeat=false { toggle-overview; }
 
-    // Wallpaper selection lives inside the QuickShell dashboard (Mod+D).
+    Mod+Shift+W hotkey-overlay-title="Open Wallpapers" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "wallpapers"; }
 
     Mod+Q { close-window; }
     Mod+Left  { focus-column-left; }
