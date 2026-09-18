@@ -1,0 +1,4 @@
+[submodule "qs-nonchalant-shell"]
+	path = .config/quickshell
+	url = https://github.com/jR4dh3y/nonchalant-shell.git
+	branch = main

@@ -81,11 +81,13 @@ python-rich
 qt5-wayland
 qt5ct
 qt6-wayland
+thunar
 tumbler
 wget
 wireplumber
 xarchiver
 xdg-desktop-portal-gnome
+xdg-utils
 swaylock-effects
 wl-clipboard
 wtype

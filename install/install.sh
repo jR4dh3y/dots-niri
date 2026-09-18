@@ -923,6 +923,11 @@ link_dotfiles() {
 	msg "Linking dotfiles into $USER_HOME"
 	mkdir -p "$USER_HOME/.config" "$USER_HOME/.config/autostart" "$USER_HOME/.local/share" "$USER_HOME/bin"
 
+	if [[ -f "$REPO_DIR/.gitmodules" ]] && command -v git >/dev/null 2>&1; then
+		msg "Initializing and updating git submodules"
+		run_as_invoking_user git -C "$REPO_DIR" submodule update --init --recursive || warn "Could not update git submodules"
+	fi
+
 	if [[ -d "$REPO_DIR/.config" ]]; then
 		for d in "$REPO_DIR/.config"/*; do
 			[[ -e "$d" ]] || continue
@@ -945,6 +950,17 @@ link_dotfiles() {
 		rsync -a --info=NAME --exclude="share/icons" --exclude="share/themes" "$REPO_DIR/.local/" "$USER_HOME/.local/"
 	fi
 
+	if [[ -x "$USER_HOME/.local/bin/rice" ]]; then
+		msg "Preparing the selected Niri rice profile"
+		run_as_invoking_user "$USER_HOME/.local/bin/rice" prepare || warn "Could not prepare the Niri rice profile; run 'rice prepare' before the next login"
+	fi
+
+	if command -v systemctl >/dev/null 2>&1; then
+		run_as_invoking_user systemctl --user daemon-reload || warn "Could not reload the user systemd manager; run 'systemctl --user daemon-reload' before the next login"
+	fi
+
+	set_default_file_manager
+
 	if [[ -d "$REPO_DIR/assets/wal" ]]; then
 		mkdir -p "$USER_HOME/.local/share/wallpapers"
 		rsync -a --info=NAME "$REPO_DIR/assets/wal/" "$USER_HOME/.local/share/wallpapers/"
@@ -952,6 +968,19 @@ link_dotfiles() {
 
 	if [[ -n "$SUDO_CMD" ]]; then
 		$SUDO_CMD chown -R "$USER_NAME":"$USER_NAME" "$USER_HOME/.config" "$USER_HOME/.local" "$USER_HOME/bin"
+	fi
+}
+
+set_default_file_manager() {
+	if ! command -v xdg-mime >/dev/null 2>&1; then
+		warn "Could not set Thunar as the default file manager; xdg-mime is not installed"
+		return
+	fi
+
+	if run_as_invoking_user xdg-mime default thunar.desktop inode/directory; then
+		msg "Set Thunar as the default file manager"
+	else
+		warn "Could not set Thunar as the default file manager"
 	fi
 }
 

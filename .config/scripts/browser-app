@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Force browser apps onto the display iGPU (AMD) so EGL/WebRTC matches Niri
+export __NV_PRIME_RENDER_OFFLOAD=0
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+export VK_LOADER_DRIVERS_SELECT=*radeon*
+export NODEVICE_SELECT=0
+
 browser=$(xdg-settings get default-web-browser)
 
 case $browser in

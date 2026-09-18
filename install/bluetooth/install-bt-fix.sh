@@ -8,10 +8,10 @@ echo "==> WirePlumber A2DP-only policy"
 $SUDO install -Dm644 \
   "$ROOT/.config/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf" \
   /etc/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf
-# Prefer live user copy if newer
-if [ -f /home/radhey/.config/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf ]; then
+user_home="${USER_HOME:-$HOME}"
+if [ -f "$user_home/.config/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf" ]; then
   $SUDO install -Dm644 \
-    /home/radhey/.config/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf \
+    "$user_home/.config/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf" \
     /etc/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf
 fi
 $SUDO rm -f /etc/wireplumber/wireplumber.conf.d/51-bluetooth-a2dp-only.conf.disabled

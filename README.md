@@ -27,7 +27,7 @@ If you only need the wallpaper assets, see `assets/wal/`.
 1) Clone the repo
 
 ```bash
-git clone https://github.com/jr4dh3y/dots-niri.git "$HOME/code/dots-niri"
+git clone --recursive https://github.com/jr4dh3y/dots-niri.git "$HOME/code/dots-niri"
 cd "$HOME/code/dots-niri"
 ```
 
@@ -81,7 +81,8 @@ The installer auto-detects:
 ### Switching desktop rices
 
 Niri has separate `config-waybar.kdl` and `config-quickshell.kdl` profiles. The
-small `config.kdl` bootstrap loads the persisted selection at login:
+selected profile is prepared before the Niri service starts, so named
+workspaces are present in Niri's initial config parse:
 
 ```bash
 rice status
@@ -91,9 +92,11 @@ rice toggle
 rice reload
 ```
 
-QuickShell is the default. Its checkout is expected at
-`~/code/random/nshell/shell`; set `NONCHALANT_SHELL_PATH` if it lives elsewhere.
-The switcher loads the matching Niri profile and keeps Waybar/Dunst and
+QuickShell is the default desktop shell. Its source lives as a git
+submodule at `.config/quickshell` (`qs-nonchalant-shell`, tracking
+`https://github.com/jR4dh3y/nonchalant-shell.git`). Set `NONCHALANT_SHELL_PATH`
+only if you want to override it with a custom development checkout.
+The switcher loads the matching Niri profile at runtime and keeps Waybar/Dunst and
 QuickShell from competing for the tray and notification D-Bus services. The
 Waybar profile starts `awww` and binds `Mod+Shift+W` to WallpyGUI. The
 QuickShell profile stops `awww` and binds `Mod+Shift+W` to the Nonchalant wallpaper
@@ -112,9 +115,9 @@ picker via IPC; `Mod+D` remains the system-usage dashboard.
 | `Mod+Space`, `Alt+Space` | Local/cloud transcription | Unbound |
 | Media and brightness keys | System commands with Dunst OSD | Nonchalant OSD |
 
-Only the five named workspaces are bound (`web`, `dev`, `chat`, `media`, and
-`vm`). Niri still keeps one empty dynamic workspace, but it will no longer
-create the extra numbered 6–9 workspaces from these profiles.
+Only the four named workspaces are bound (`web`, `dev`, `chat`, and
+`media`). Niri still keeps one empty dynamic workspace, but it will no longer
+create the extra numbered 5–9 workspaces from these profiles.
 
 ## Troubleshooting
 

@@ -7,15 +7,27 @@ readonly STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 readonly STATE_DIR="$STATE_HOME/dots-niri"
 readonly STATE_FILE="$STATE_DIR/rice"
 readonly LOG_DIR="$STATE_DIR/log"
-readonly QUICKSHELL_DIR="${NONCHALANT_SHELL_PATH:-$HOME/code/random/nshell/shell}"
+resolve_quickshell_dir() {
+	if [[ -n "${NONCHALANT_SHELL_PATH:-}" && -d "$NONCHALANT_SHELL_PATH" ]]; then
+		printf '%s\n' "$NONCHALANT_SHELL_PATH"
+	elif [[ -f "$CONFIG_HOME/quickshell/shell.qml" ]]; then
+		printf '%s\n' "$CONFIG_HOME/quickshell"
+	elif [[ -f "$HOME/code/random/nshell/shell/shell.qml" ]]; then
+		printf '%s\n' "$HOME/code/random/nshell/shell"
+	else
+		printf '%s\n' "$CONFIG_HOME/quickshell"
+	fi
+}
+readonly QUICKSHELL_DIR="$(resolve_quickshell_dir)"
 readonly NIRI_CONFIG_DIR="$CONFIG_HOME/niri"
 
 usage() {
 	cat <<'EOF'
-Usage: rice [waybar|quickshell|toggle|reload|status|start]
+Usage: rice [waybar|quickshell|toggle|reload|status|start|prepare]
 
 Switch between the Waybar and QuickShell desktop rices. The selected rice is
 remembered across Niri sessions. With no argument, the current status is shown.
+`prepare` selects the profile that Niri should load before its session starts.
 
 EOF
 }
@@ -49,10 +61,13 @@ quickshell_pids() {
 	while read -r pid; do
 		[[ -r "/proc/$pid/cmdline" ]] || continue
 		command_line=$(tr '\0' ' ' < "/proc/$pid/cmdline")
-		if [[ "$command_line" == *"qs -p $QUICKSHELL_DIR"* ]]; then
+		if [[ "$command_line" == *"qs ipc"* ]]; then
+			continue
+		fi
+		if [[ "$command_line" =~ (^|[[:space:]/])(qs|quickshell)([[:space:]]|$) ]]; then
 			printf '%s\n' "$pid"
 		fi
-	done < <(pgrep -x qs 2>/dev/null || true)
+	done < <(pgrep -x qs 2>/dev/null || true; pgrep -x quickshell 2>/dev/null || true) | sort -u
 }
 
 quickshell_running() {
@@ -164,6 +179,34 @@ profile_path() {
 	printf '%s/config-%s.kdl\n' "$NIRI_CONFIG_DIR" "$1"
 }
 
+active_profile_path() {
+	printf '%s/niri-profile.kdl\n' "$STATE_DIR"
+}
+
+prepare_profile() {
+	local selected="${1:-$(read_rice)}"
+	local profile active temporary
+
+	case "$selected" in
+		waybar|quickshell) ;;
+		*) printf 'rice: unknown rice: %s\n' "$selected" >&2; return 2 ;;
+	esac
+
+	profile=$(profile_path "$selected")
+	[[ -r "$profile" ]] || {
+		printf 'rice: Niri profile not found: %s\n' "$profile" >&2
+		return 1
+	}
+	profile=$(readlink -f "$profile")
+
+	mkdir -p "$STATE_DIR"
+	active=$(active_profile_path)
+	temporary="$active.tmp.$$"
+	rm -f -- "$temporary"
+	ln -s -- "$profile" "$temporary"
+	mv -Tf -- "$temporary" "$active"
+}
+
 validate_profile() {
 	local target="$1"
 	local profile
@@ -244,6 +287,13 @@ start_waybar() {
 	start_kded
 }
 
+start_selected() {
+	case "$(read_rice)" in
+		quickshell) start_quickshell ;;
+		waybar) start_waybar ;;
+	esac
+}
+
 restore_profile() {
 	local previous="$1"
 
@@ -310,6 +360,7 @@ activate() {
 	esac
 
 	write_rice "$target"
+	prepare_profile "$target"
 	printf 'Active rice: %s\n' "$target"
 }
 
@@ -338,7 +389,7 @@ main() {
 	local selected
 
 	case "$command" in
-		waybar|quickshell|toggle|reload|start)
+		waybar|quickshell|toggle|reload|start|prepare)
 			if [[ "${RICE_SWITCH_LOCKED:-0}" != "1" ]]; then
 				mkdir -p "$STATE_DIR"
 				exec flock --close "$STATE_DIR/switch.lock" \
@@ -349,6 +400,7 @@ main() {
 
 	case "$command" in
 		waybar|quickshell) activate "$command" ;;
+		prepare) prepare_profile "${2:-}" ;;
 		toggle)
 			selected=$(read_rice)
 			if [[ "$selected" == "quickshell" ]]; then
@@ -373,7 +425,10 @@ main() {
 			fi
 			;;
 		status) show_status ;;
-		start) activate "$(read_rice)" ;;
+		start)
+			start_selected
+			printf 'Started rice: %s\n' "$(read_rice)"
+			;;
 		-h|--help|help) usage ;;
 		*) usage >&2; return 2 ;;
 	esac

@@ -5,6 +5,8 @@
 .config/fish/functions/
 .config/fish/completions/
 .config/fish/conf.d/
+.config/fish/config.local.fish
+*.local.fish
 
 
 # Runtime / temp files created by fish
@@ -28,3 +30,6 @@ tools/
 # Waybar nightlight temporary state files
 .config/waybar/nightlight-temp
 .config/waybar/nightlight-state
+
+# Locally disabled configurations
+*.disabled
