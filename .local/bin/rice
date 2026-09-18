@@ -61,10 +61,13 @@ quickshell_pids() {
 	while read -r pid; do
 		[[ -r "/proc/$pid/cmdline" ]] || continue
 		command_line=$(tr '\0' ' ' < "/proc/$pid/cmdline")
-		if [[ "$command_line" == *"qs -p $QUICKSHELL_DIR"* ]]; then
+		if [[ "$command_line" == *"qs ipc"* ]]; then
+			continue
+		fi
+		if [[ "$command_line" =~ (^|[[:space:]/])(qs|quickshell)([[:space:]]|$) ]]; then
 			printf '%s\n' "$pid"
 		fi
-	done < <(pgrep -x qs 2>/dev/null || true)
+	done < <(pgrep -x qs 2>/dev/null || true; pgrep -x quickshell 2>/dev/null || true) | sort -u
 }
 
 quickshell_running() {
