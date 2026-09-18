@@ -1,6 +1,9 @@
-// Bootstrap only. The rice helper loads one of the complete profiles below:
-//   config-quickshell.kdl
-//   config-waybar.kdl
-// Keeping this file neutral prevents either rice from briefly starting the
-// other rice's bar, notification daemon, or wallpaper daemon at login.
+// Load the selected complete profile before Niri creates its initial
+// workspaces. rice prepare updates this state symlink before niri.service
+// starts; the optional form keeps direct/manual launches recoverable.
+include optional=true "~/.local/state/dots-niri/niri-profile.kdl"
+
+// Start only the selected rice's shell/bar. The profile itself is already
+// loaded above, so reloading it from spawn-at-startup would add named
+// workspaces after startup and reverse their order.
 spawn-at-startup "sh" "-c" "exec \"$HOME/.local/bin/rice\" start"

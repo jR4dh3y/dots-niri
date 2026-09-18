@@ -7,7 +7,7 @@ Wants=wireplumber.service pipewire.service
 Type=oneshot
 # Give desktop + blueman a moment to settle before we power-cycle
 ExecStartPre=/bin/sleep 4
-ExecStart=/home/radhey/.local/bin/bt-stabilize
+ExecStart=%h/.local/bin/bt-stabilize
 RemainAfterExit=yes
 
 [Install]

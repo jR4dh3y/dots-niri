@@ -29,6 +29,11 @@ if test -d ~/go/bin
     fish_add_path --prepend ~/go/bin
 end
 
+# Add Bun-installed CLIs to PATH (portable: ~ expands to $HOME, no hardcoded username)
+if test -d ~/.bun/bin
+    fish_add_path --prepend ~/.bun/bin
+end
+
 # Add depot_tools to PATH
 if test -d ~/Applications/depot_tools
     if not contains -- ~/Applications/depot_tools $PATH
@@ -100,6 +105,7 @@ alias lt='eza -aT --color=always --group-directories-first --icons' # tree listi
 alias l.="eza -a | grep -e '^\.'"                                     # show only dotfiles
 
 # Common use
+alias x='xdg-open'
 alias grubup="sudo grub-mkconfig -o /boot/grub/grub.cfg"
 alias fixpacman="sudo rm /var/lib/pacman/db.lck"
 alias tarnow='tar -acf '
@@ -139,12 +145,18 @@ alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
 
 # random shits
 alias oc='opencode .'
+# Tokscale 4.9.0 submit regression: keep using the last working release.
+function bunx
+    if test (count $argv) -gt 0; and test "$argv[1]" = tokscale
+        command bunx tokscale@4.8.0 $argv[2..-1]
+    else
+        command bunx $argv
+    end
+end
 
-alias pico "sshpass -p '0410' ssh pico@192.168.1.2"
-
-function mount-ext-drive
-    printf '0410\n' | sudo -S mkdir -p /mnt/ext-drive
-    and printf '0410\n' | sudo -S ntfs-3g /dev/sdb1 /mnt/ext-drive
+# Local machine-specific configuration & secrets (ignored by git)
+if test -f $__fish_config_dir/config.local.fish
+    source $__fish_config_dir/config.local.fish
 end
 
 
@@ -386,6 +398,3 @@ end
 # >>> grok installer >>>
 fish_add_path $HOME/.grok/bin
 # <<< grok installer <<<
-
-# kimi-code
-fish_add_path -g "/home/radhey/.kimi-code/bin"

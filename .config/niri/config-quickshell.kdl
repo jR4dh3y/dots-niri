@@ -72,7 +72,8 @@ layout {
     border {
         on
         width 1
-        active-gradient from="#c59edc" to="#c3fb5b"
+        active-color "#c59edc"
+        // active-gradient from="#c59edc" to="#c3fb5b"
     }
     shadow {
         on
@@ -94,7 +95,7 @@ workspace "web"
 workspace "dev"
 workspace "chat"
 workspace "media"
-workspace "vm"
+// workspace "vm"
 
 environment {
     XDG_MENU_PREFIX "arch-"
@@ -164,8 +165,6 @@ window-rule {
 }
 
 window-rule {
-    // This rule will match all windows with the app-id "org.gnome.Nautilus"
-    // and set their default column width to 0.5 of the output width.
     match app-id="io.github.jR4dh3y.wallpygui"
     open-floating true
 }
@@ -176,7 +175,7 @@ window-rule {
 }
 
 window-rule {
-    match app-id="org.gnome.Nautilus"
+    match app-id="thunar"
     opacity 0.88
 }
 
@@ -193,6 +192,7 @@ window-rule {
 window-rule {
     exclude app-id="zen-browser"
     exclude app-id="zen"
+    exclude app-id="cider"
     draw-border-with-background false
     geometry-corner-radius 0
     background-effect {
@@ -225,11 +225,29 @@ layer-rule {
     }
 }
 
+// Plain QuickShell surfaces use full-screen transparent layers like
+// Nonchalant does. Keep them unblurred so the shell stays crisp.
+layer-rule {
+    match namespace=r#"^quickshell(?::.*)?$"#
+    background-effect {
+        blur false
+    }
+}
+
+layer-rule {
+    match namespace=r#"(?i)^sttd(?::.*)?$"#
+    background-effect {
+        blur false
+    }
+}
+
 layer-rule {
     match layer="top"
     match layer="overlay"
     exclude namespace="wayland-pet"
     exclude namespace=r#"^nonchalant(?::.*)?$"#
+    exclude namespace=r#"^quickshell(?::.*)?$"#
+    exclude namespace=r#"(?i)^sttd(?::.*)?$"#
     background-effect {
         blur true
         xray false
@@ -247,6 +265,8 @@ layer-rule {
     match layer="bottom"
     match layer="background"
     exclude namespace=r#"^nonchalant(?::.*)?$"#
+    exclude namespace=r#"^quickshell(?::.*)?$"#
+    exclude namespace=r#"(?i)^sttd(?::.*)?$"#
     background-effect {
         blur true
     }
@@ -355,6 +375,12 @@ window-rule {
     open-focused true
 }
 
+window-rule {
+    match app-id="chrome-web.whatsapp.com__-Default"
+    default-column-width { fixed 1335; }
+    default-window-height { fixed 1036; }
+}
+
 // Workspace "chat": WhatsApp Web, Steam
 window-rule {
     match app-id="chrome-web.whatsapp.com__-Default"
@@ -393,46 +419,46 @@ binds {
     // Keys consist of modifiers separated by + signs, followed by an XKB key name
 
     // Nonchalant QuickShell actions.
-    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
-    Mod+D hotkey-overlay-title="Open Dashboard" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "system-monitor"; }
+    Mod+A hotkey-overlay-title="Open App Launcher" { spawn "qs" "ipc" "call" "nonchalant" "run" "launcher"; }
+    Mod+D hotkey-overlay-title="Open Dashboard" { spawn "qs" "ipc" "call" "nonchalant" "run" "system-monitor"; }
     Mod+V hotkey-overlay-title="Open Clipboard History" { spawn "rsclip" "show"; }
-    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "launcher"; }
-    Mod+C hotkey-overlay-title="Open Project" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "projects"; }
-    Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "/home/radhey/.local/bin/project-picker" "zed"; }
-    Mod+Grave hotkey-overlay-title="Open AI Assistant" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "assistant"; }
+    Mod+Period hotkey-overlay-title="Open App Launcher" { spawn "qs" "ipc" "call" "nonchalant" "run" "launcher"; }
+    Mod+C hotkey-overlay-title="Open Project" { spawn "qs" "ipc" "call" "nonchalant" "run" "projects"; }
+    Mod+Shift+C hotkey-overlay-title="Open Zed Project" { spawn "project-picker" "zed"; }
+    Mod+Grave hotkey-overlay-title="Open AI Assistant" { spawn "qs" "ipc" "call" "nonchalant" "run" "assistant"; }
 
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
     Mod+W hotkey-overlay-title="Open a Web Browser" { spawn "zen-browser"; }
     // Keypad 1/2 are reported as KP_End/KP_Down when Num Lock is off.
-    Mod+KP_1 hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
-    Mod+KP_End hotkey-overlay-title="Open ChatGPT" { spawn "/home/radhey/.config/scripts/browser-app" "https://chatgpt.com/"; }
-    Mod+KP_2 hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
-    Mod+KP_Down hotkey-overlay-title="Open WhatsApp" { spawn "/home/radhey/.config/scripts/browser-app" "https://web.whatsapp.com/"; }
-    Mod+E hotkey-overlay-title="Open a File Manager" { spawn "nautilus"; }
+    Mod+KP_1 hotkey-overlay-title="Open ChatGPT" { spawn ".config/scripts/browser-app" "https://chatgpt.com/"; }
+    Mod+KP_End hotkey-overlay-title="Open ChatGPT" { spawn ".config/scripts/browser-app" "https://chatgpt.com/"; }
+    Mod+KP_2 hotkey-overlay-title="Open WhatsApp" { spawn ".config/scripts/browser-app" "https://web.whatsapp.com/"; }
+    Mod+KP_Down hotkey-overlay-title="Open WhatsApp" { spawn ".config/scripts/browser-app" "https://web.whatsapp.com/"; }
+    Mod+E hotkey-overlay-title="Open a File Manager" { spawn "thunar"; }
     Mod+M hotkey-overlay-title="Open Cider" { spawn "cider"; }
-    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "powermenu"; }
+    Mod+X hotkey-overlay-title="Open the Power Menu" { spawn "qs" "ipc" "call" "nonchalant" "run" "powermenu"; }
     Mod+I hotkey-overlay-title="Install a program" {spawn "kitty" "--class" "floating" ".config/scripts/install.sh"; }
     Mod+O hotkey-overlay-title="Install a program (aur)"{spawn "kitty" "--class" "floating" ".config/scripts/install-aur.sh"; }
     Mod+U hotkey-overlay-title="Uninstall a program "{spawn "kitty" "--class" "floating" ".config/scripts/uninstall.sh"; }
     Mod+P hotkey-overlay-title="Port Manager" {spawn "kitty" "--class" "port" ".config/scripts/port-manager.sh";}
-    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "lockscreen" "lock"; }
+    Mod+L hotkey-overlay-title="Lock Desktop" { spawn "qs" "ipc" "call" "lockscreen" "lock"; }
     Mod+Z hotkey-overlay-title="Reload QuickShell" { spawn "sh" "-c" "exec \"$HOME/.local/bin/rice\" reload"; }
-    // Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" "/home/radhey/.config/scripts/whisper-transcribe.sh"; }
-    // Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" "/home/radhey/.config/scripts/whisper-cloud.sh"; }
+    // Mod+Space hotkey-overlay-title="Transcribe Audio" { spawn "sh" ".config/scripts/whisper-transcribe.sh"; }
+    // Alt+Space hotkey-overlay-title="Cloud Transcribe" { spawn "sh" ".config/scripts/whisper-cloud.sh"; }
 
     // Route media keys through Nonchalant so its OSD stays in sync.
-    XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "increment"; }
-    XF86AudioLowerVolume  allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "decrement"; }
-    XF86AudioMute         allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMute"; }
-    XF86AudioMicMute      allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "audio" "toggleMicMute"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "decrement"; }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "brightness" "increment"; }
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "qs" "ipc" "call" "audio" "increment"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "qs" "ipc" "call" "audio" "decrement"; }
+    XF86AudioMute         allow-when-locked=true { spawn "qs" "ipc" "call" "audio" "toggleMute"; }
+    XF86AudioMicMute      allow-when-locked=true { spawn "qs" "ipc" "call" "audio" "toggleMicMute"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "decrement"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "increment"; }
 
     Mod+Tab repeat=false { toggle-overview; }
 
-    Mod+Shift+W hotkey-overlay-title="Open Wallpapers" { spawn "qs" "-p" "/home/radhey/code/random/nshell/shell" "ipc" "call" "nonchalant" "run" "wallpapers"; }
+    Mod+Shift+W hotkey-overlay-title="Open Wallpapers" { spawn "qs" "ipc" "call" "nonchalant" "run" "wallpapers"; }
 
     Mod+Q { close-window; }
     Mod+Left  { focus-column-left; }
@@ -473,8 +499,8 @@ binds {
     Mod+Shift+Page_Up   { move-workspace-up; }
     Mod+Shift+U         { move-workspace-down; }
     Mod+Shift+I         { move-workspace-up; }
-    Shift+Page_Down { spawn "sh" "-c" "/home/radhey/.config/scripts/scale-adjust.sh -0.05"; }
-    Shift+Page_Up   { spawn "sh" "-c" "/home/radhey/.config/scripts/scale-adjust.sh +0.05"; }
+    Shift+Page_Down { spawn "sh" "-c" ".config/scripts/scale-adjust.sh -0.05"; }
+    Shift+Page_Up   { spawn "sh" "-c" ".config/scripts/scale-adjust.sh +0.05"; }
 
     Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
     Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
@@ -496,12 +522,12 @@ binds {
     Mod+2 { focus-workspace "dev"; }
     Mod+3 { focus-workspace "chat"; }
     Mod+4 { focus-workspace "media"; }
-    Mod+5 { focus-workspace "vm"; }
+    // Mod+5 { focus-workspace "vm"; }
     Mod+Shift+1 { move-column-to-workspace "web"; }
     Mod+Shift+2 { move-column-to-workspace "dev"; }
     Mod+Shift+3 { move-column-to-workspace "chat"; }
     Mod+Shift+4 { move-column-to-workspace "media"; }
-    Mod+Shift+5 { move-column-to-workspace "vm"; }
+    // Mod+Shift+5 { move-column-to-workspace "vm"; }
 
     Mod+BracketLeft  { consume-or-expel-window-left; }
     Mod+BracketRight { consume-or-expel-window-right; }
@@ -531,6 +557,8 @@ binds {
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }
+    // Capture the complete layout at native output scale and copy it as PNG.
+    Mod+Shift+Print hotkey-overlay-title=null { spawn-sh "grim - | wl-copy --type image/png"; }
     Mod+Print hotkey-overlay-title="Copy Latest Screenshot Path" { spawn ".config/scripts/copy-latest-screenshot-path.sh"; }
 
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
