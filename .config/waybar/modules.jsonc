@@ -110,7 +110,7 @@
       ]
    },
 
-   // Click opens Blueman to scan and pair; right-click toggles the radio.
+   // Click opens Blueman to scan and pair; right-click turns Bluetooth on/off.
    "bluetooth": {
       "format": "󰂯",
       "format-connected": "󰂱",
@@ -119,11 +119,12 @@
       "format-no-controller": "",
       "tooltip-format": "Bluetooth on · click to pair a device",
       "tooltip-format-off": "Bluetooth off · right-click to turn on",
+      "tooltip-format-disabled": "Bluetooth blocked · right-click to turn on",
       "tooltip-format-connected": "{num_connections} connected\n{device_enumerate}\nClick to manage or pair devices",
       "tooltip-format-enumerate-connected": "{device_alias}",
       "tooltip-format-enumerate-connected-battery": "{device_alias} · {device_battery_percentage}%",
       "on-click": "blueman-manager",
-      "on-click-right": "rfkill toggle bluetooth"
+      "on-click-right": "$HOME/.config/scripts/waybar-bluetooth-toggle.sh"
    },
 
    "group/audio-group": {
